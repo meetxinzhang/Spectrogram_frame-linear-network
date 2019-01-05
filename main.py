@@ -1,11 +1,18 @@
-# A script to download bird sound files from the www.xeno-canto.org archives.
+# 一个从 www.xeno-canto.org 下载音频数据的网络爬虫
 #
-# forked from karoliina/xeno-canto-download
+# 下载列表维护，支持断点续传；
+# 捕获网络异常，加入重试机制；
+# 可根据重试计数更换代理；
+# 模块化设计，可根据文件计数器加入动态代理；
 #
-# The program downloads all the files found with the search terms into
-# subdirectory sounds.
-
-# 代理网站
+# 不同的声音种类放入 sounds/ 下不同的文件夹，文件夹名直接就是标签
+# 文件列表放入 logs/ 文件夹下
+#
+# by Devin Zhang 
+# meetdevin.zh@outlook.com
+#
+#
+# 可用代理网站
 # http://www.xicidaili.com/
 # http://www.66ip.cn/
 # http://www.mimiip.com/gngao/
@@ -18,25 +25,6 @@ import os
 import socket
 
 
-# returns the Xeno Canto catalogue numbers for the given search terms.
-# @param searchTerms: list of search terms
-# http://www.xeno-canto.org/explore?query=common+snipe
-# def read_numbers(search_terms):
-#     i = 1  # page number
-#     numbers = []
-#     while True:
-#         html = my_request('https://www.xeno-canto.org/explore?query={0}&pg={1}'.format(search_terms, i))
-#         new_results = re.findall(r"/(\d+)/download", html)
-#         if len(new_results) > 0:
-#             numbers.extend(new_results)
-#             print("read_numbers: the page: " + str(i))
-#         # check if there are more than 1 page of results (30 results per page)
-#         if len(new_results) < 30:
-#             break
-#         else:
-#             i += 1  # move onto next page
-#
-#     return numbers
 class MyWebCrawler:
 
     socket.setdefaulttimeout(100)
