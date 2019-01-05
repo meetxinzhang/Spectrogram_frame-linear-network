@@ -148,13 +148,14 @@ class MyWebCrawler:
             print('从 logs/{} 中恢复日志数据'.format(search_terms))
         else:
             file_urls, bird_names, ids = self.html_reader(search_terms)
-            self.logs_saver('log_files.txt', file_urls, search_terms)
-            self.logs_saver('log_names.txt', bird_names, search_terms)
-            self.logs_saver('log_ids.txt', ids, search_terms)
 
-        if len(file_urls) == 0:
-            print("No search results.")
-            sys.exit()
+            if len(file_urls) == 0:
+                print("No search results.")
+                sys.exit()
+            else:
+                self.logs_saver(folder=search_terms, filename='log_files.txt', data=file_urls)
+                self.logs_saver(folder=search_terms, filename='log_names.txt', data=bird_names)
+                self.logs_saver(folder=search_terms, filename='log_ids.txt', data=ids)
 
         # regex for extracting the filename from the file URL
         # fnFinder = re.compile('\S+/+(\S+)')
@@ -167,19 +168,21 @@ class MyWebCrawler:
             # as the filename.
             local_filename = bird_names[i] + "_" + ids[i] + ".mp3"
             if len("sounds/" + local_filename) > 255:
-                local_filename = bird_names[i] + "_" + i + ".mp3"
+                local_filename = bird_names[i] + "_" + str(i) + ".mp3"
 
-            # 下载文件, 利用 socket.timeout 加入了重试机制
             print('{} downloading {}'.format(i, local_filename))
-            if not os.path.exists("sounds/{}".format(bird_names[i])):
+            if not os.path.exists("sounds/{}/{}".format(search_terms, bird_names[i])):
                 # 如果没有该分类文件夹，则创建文件夹用于保存该分类下文件
-                print("Creating subdirectory /sounds/{} ".format(bird_names[i]) + "for downloaded files...")
-                os.makedirs("sounds/{}".format(bird_names[i]))
-            if os.path.exists("sounds/{}/{}".format(bird_names[i], local_filename)):
+                print("########## Creating subdirectory /sounds/{}/{} "
+                      .format(search_terms, bird_names[i]) + "for downloaded files...")
+                os.makedirs("sounds/{}/{}".format(search_terms, bird_names[i]))
+            if os.path.exists("sounds/{}/{}/{}".format(search_terms, bird_names[i], local_filename)):
                 # 如果该文件已经存在，则继续下一次循环
                 continue
 
-            self.downloader_retry('https:' + file_urls[i], "sounds/{}/".format(bird_names[i]) + local_filename)
+            # 下载文件, 利用 socket.timeout 加入了重试机制
+            self.downloader_retry('https:' + file_urls[i],
+                                  "sounds/{}/{}/{}".format(search_terms, bird_names[i], local_filename))
 
             # try:
             #     request.urlretrieve('https:' + file_urls[i], "sounds/{}/".format(bird_names[i]) + local_filename,
@@ -218,25 +221,24 @@ class MyWebCrawler:
         while count <= 5:
             try:
                 request.urlretrieve(url, local_file, self._progress)
-                print("Downloading {} successful".format(local_file))
+                print(" Download {} successful".format(local_file))
                 break
             except socket.timeout:
-                print('downloader_retry_超时!!!!!')
+                print('!!!!!!!!!!downloader_retry_timeout')
                 print('Reloading for %d time' % count if count == 1 else 'Reloading for %d times' % count)
                 count += 1
             except error.HTTPError as e:
                 if hasattr(e, 'code'):
-                    print('downloader_retry_code: ' + str(e.code) + '\n' + 'error url: ' + url)
+                    print('!!!!!!!!!!downloader_retry_code: ' + str(e.code) + '\n' + 'error url: ' + url)
                     print('Reloading for %d time' % count if count == 1 else 'Reloading for %d times' % count)
                     count += 1
             except error.URLError as e:
                 if hasattr(e, 'reason'):
-                    print('downloader_retry_reason: ' + str(e.reason) + '\n' + 'error url: ' + url)
+                    print('!!!!!!!!!!downloader_retry_reason: ' + str(e.reason) + '\n' + 'error url: ' + url)
                     print('Reloading for %d time' % count if count == 1 else 'Reloading for %d times' % count)
                     count += 1
         if count > 5:
-            print("downloading failed!!!!!!!!!!!!! for {}".format(url))
-            self.finished = False
+            print("!!!!!!!!!!download failed!!!!!!!!!! for {}".format(url))
 
     def _progress(self, block_num, block_size, total_size):
         """
@@ -249,20 +251,20 @@ class MyWebCrawler:
         per = 100.0 * block_num * block_size / total_size
         if per > 100:
             per = 100
-        print("\r downloading: %5.1f%%" % per, end="")
+        print("\r progress: %5.1f%%" % per, end="")
         # print(' {}%'.format(per))
 
-    def logs_saver(self, filename, data, search_terms):
-        if not os.path.exists("logs/" + search_terms):
-            print("Creating logs/{}...".format(search_terms))
-            os.makedirs("logs/" + search_terms)
+    def logs_saver(self, folder, filename, data):
+        if not os.path.exists("logs/" + folder):
+            print("########## Creating logs/{}...".format(folder))
+            os.makedirs("logs/" + folder)
 
-        if not os.path.exists("logs/{}/{}".format(search_terms, filename)):
-            print("Creating log/{}/{}".format(search_terms, filename))
-            file = open('logs/{}/{}'.format(search_terms, filename), 'w')
+        if not os.path.exists("logs/{}/{}".format(folder, filename)):
+            print("########## Creating log/{}/{}".format(folder, filename))
+            file = open('logs/{}/{}'.format(folder, filename), 'w')
             file.close()
 
-        file = open('logs/{}/{}'.format(search_terms, filename), 'a')
+        file = open('logs/{}/{}'.format(folder, filename), 'a')
         for i in range(len(data)):
             # 去除[],这两行按数据不同，可以选择
             s = str(data[i]).replace('[', '').replace(']', '')
@@ -305,8 +307,12 @@ if __name__ == '__main__':
 
     for line in commons:
 
+        if line is '\n':
+            continue
+
         line = line.replace(' ', '+')
         line = line.strip('\n')
+        line = ''.join(list(filter(lambda i: not i.isdigit(), line)))
         print('\nfor search {} :'.format(line))
         mwc.crawling_scheduler(line)
 
