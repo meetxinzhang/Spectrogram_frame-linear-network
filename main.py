@@ -8,7 +8,7 @@
 # 不同的声音种类放入 sounds/ 下不同的文件夹，文件夹名直接就是标签
 # 文件列表放入 logs/ 文件夹下
 #
-# by Devin Zhang 
+# by Devin Zhang
 # meetdevin.zh@outlook.com
 #
 #
@@ -158,17 +158,18 @@ class MyWebCrawler:
             if len("sounds/" + local_filename) > 255:
                 local_filename = bird_names[i] + "_" + str(i) + ".mp3"
 
-            print('{} downloading {}'.format(i, local_filename))
             if not os.path.exists("sounds/{}/{}".format(search_terms, bird_names[i])):
                 # 如果没有该分类文件夹，则创建文件夹用于保存该分类下文件
                 print("########## Creating subdirectory /sounds/{}/{} "
                       .format(search_terms, bird_names[i]) + "for downloaded files...")
                 os.makedirs("sounds/{}/{}".format(search_terms, bird_names[i]))
             if os.path.exists("sounds/{}/{}/{}".format(search_terms, bird_names[i], local_filename)):
+                print('{} checked {}'.format(i, local_filename))
                 # 如果该文件已经存在，则继续下一次循环
                 continue
 
             # 下载文件, 利用 socket.timeout 加入了重试机制
+            print('{} downloading {}'.format(i, local_filename))
             self.downloader_retry('https:' + file_urls[i],
                                   "sounds/{}/{}/{}".format(search_terms, bird_names[i], local_filename))
 
