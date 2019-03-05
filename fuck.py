@@ -55,19 +55,27 @@ class input_data(object):
         while self.file_point < end:
             imagePath = self.filenames[self.file_point]
             try:
-                features = audio2mat.get_features_mat(imagePath)
+                # [5, 80, 200]
+                features = audio2mat.get_features_3dmat(imagePath)
             except EOFError:
                 print('EOFError', imagePath)
                 self.file_point += 1
                 end += 1
                 continue
+            except Exception as e:
+                print(e.args)
+                self.file_point += 1
+                end += 1
+                continue
 
             # print(features.shape)
-            features = features[:, 0:2000]
-            features = np.pad(features, ((0, 0), (0, 2000 - len(features[1]))), mode='constant', constant_values=0)
+            # features = features[:, 0:2000]
+            # features = np.pad(features, ((0, 0), (0, 2000 - len(features[1]))), mode='constant', constant_values=0)
 
-            features = np.expand_dims(features, axis=2)
-            features = features.reshape([80, 200, 10, 1])
+            # 添加颜色通道
+            features = np.expand_dims(features, axis=-1)
+            print('fuck: 76 expand_dims', features.shape)
+            # features = features.reshape([5, 80, 200, 1])
 
             # print('mfcc.shape paded: ', features.shape)
             x_data.append(features)  # (image.data, dtype='float32')

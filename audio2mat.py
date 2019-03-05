@@ -1,29 +1,59 @@
 import librosa.display
-import matplotlib.pyplot as plt
-import numpy as np
 
 
-def get_features_mat(fileneme):
-    y, sr = librosa.load(fileneme, sr=44100)
+def get_features_3dmat(fileneme, depth, height, width):
+    y, sr = librosa.load(fileneme, sr=None)
 
-    return concatenate(y, sr)
+    features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
+
+    if len(features3d) < 5:
+        raise Exception('该数据时长不够：', fileneme)
+
+    return features3d
 
 
-def extract_feature(y, sr):
+def windows(data, window_size):
+    start = 0
+    while start < len(data):
+        yield start, start + window_size
+        start += int(window_size / 2)
+
+
+def stack_features(y, sr, depth=5, bands=80, frames=200):
+    window_size = 512 * (frames - 1)
+    features3d = []
+
+    for (start, end) in windows(y, window_size):
+        # (1)此处是为了是将大小不一样的音频文件用大小window_size，
+        # stride=window_size/2的窗口，分割为等大小的时间片段。
+        # (2)计算每一个分割片段的log mel_sepctrogram.
+        # 或者，先分别计算大小不一的音频的log mel_spectrogram,在通过固定的窗口，
+        # 切割等大小的频谱图。
+        if len(y[start:end]) == window_size:
+            signal = y[start:end]
+            features2d = cal_features(y=signal, sr=sr, height=bands)
+            # print('111111', np.shape(features2d))
+            # logspec = logspec.T.flatten()[:, np.newaxis].T
+            features3d.append(features2d)
+
+    return features3d[0:depth]
+
+
+def cal_features(y, sr, height=80):
     # 语谱图 ,也叫时频域谱,最基本的物理特征
     # stft = librosa.core.stft(y, n_fft=1024, hop_length=512)
     # print('stft', stft.shape)
 
     # Mel频率倒谱系数
-    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=80)
+    # mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=80)
     # print('mfccs: ', mfccs.shape)
 
     # 色度频率
     # chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     # print('chroma: ', chroma.shape)
 
-    # mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=80, n_fft=1024, hop_length=512)
-    # logsmel = librosa.feature.l
+    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, overlapping=512)
+    logspec = librosa.amplitude_to_db(mel)
     # print('logsmel: ', logsmel.shape)
 
     # 计算光谱对比
@@ -41,23 +71,15 @@ def extract_feature(y, sr):
     # 包络
     # librosa.feature.tempogram
 
+    # ext_features = np.r_[mfcc]
+
     # d = librosa.amplitude_to_db(mel)
     # librosa.display.specshow(d, y_axis='mel', x_axis='time')
     # plt.colorbar(format='%+2.0f dB')
     # plt.title('Mel Power-Scaled Frequency Spectrogram')
     # plt.tight_layout()
     # plt.show()
-
-    return mfccs
-
-
-# Concatenate all features and labels for each file
-def concatenate(y, sr):
-    mfccs = extract_feature(y, sr)
-    ext_features = np.r_[mfccs]
-
-    # print('ext_features', ext_features.shape)
-    return ext_features
+    return logspec
 
 
 # def get_mp3_tus(fileneme_batch):

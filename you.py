@@ -8,6 +8,7 @@ import fuck
 
 path = 'sounds/'
 fuckdata = fuck.input_data(path)
+# [5, 80, 200, 1]
 
 # learning_rate = 0.00001
 # training_iters = 300000 #steps
@@ -16,9 +17,9 @@ fuckdata = fuck.input_data(path)
 # model
 height = 80
 wigth = 200
-depth = 10
+depth = 5
 chennel = 1
-rnn_units = 160
+rnn_units = 1024
 n_classes = 8
 
 learning_rate = 0.001
@@ -26,7 +27,7 @@ training_iters = 100000
 batch_size = 10
 display_step = 1
 
-x = tf.placeholder("float", [None, height, wigth, depth, chennel])
+x = tf.placeholder("float", [None, depth, height, wigth, chennel])
 y = tf.placeholder("float", [None, n_classes])
 
 ##############################################

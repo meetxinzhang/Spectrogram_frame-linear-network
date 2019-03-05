@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 import numpy as np
-from get_features import get_mp3_tu
+from audio2mat import get_features_3dmat
 from class_names import class_names
 
 
@@ -25,7 +25,7 @@ def get_files_names(train_file_dir):
 
 def _py_func_filter(filename, label):
     try:
-        get_mp3_tu(filename.decode())
+        get_features_3dmat(filename.decode(), depth=5, height=80, width=200)
         return True
     except EOFError:
         print('EOFError', filename.decode())
@@ -36,7 +36,7 @@ def _py_func_filter(filename, label):
 
 
 def _py_func_map(filename, label):
-    image = get_mp3_tu(filename.decode())
+    image = get_features_3dmat(filename.decode(), depth=5, height=80, width=200)
 
     image = np.expand_dims(image, axis=2)
     image = tf.image.resize_image_with_crop_or_pad(image, target_height=80, target_width=2000)

@@ -25,10 +25,10 @@ n_steps = 80
 n_hidden = 128
 n_classes = 10
 
-learning_rate = 0.001
-training_iters = 100000
-batch_size = 50
-display_step = 10
+learning_rate = 0.02
+training_iters = 1000
+batch_size = 10
+display_step = 5
 x = tf.placeholder("float", [None, n_steps, n_input])
 y = tf.placeholder("float", [None, n_classes])
 
@@ -50,13 +50,14 @@ def mfcc_batch_generator(batch_size=10):
         # print("loaded batch of %d files" % len(files))
         shuffle(files)
         for file in files:
-            if not file.endswith(".wav"): continue
+            if not file.endswith(".mp3"):
+                continue
             wave, sr = librosa.load(path+file, mono=True)
             mfcc = librosa.feature.mfcc(wave, sr)
-            label = dense_to_one_hot(int(file[0]),10)
+            label = dense_to_one_hot(int(file[0]), 2)
             labels.append(label)
-            # print(np.array(mfcc).shape)
-            mfcc = np.pad(mfcc,((0,0),(0,80-len(mfcc[0]))), mode='constant', constant_values=0)
+            print(np.array(mfcc).shape)
+            mfcc = np.pad(mfcc, ((0, 0), (0, 80-len(mfcc[0]))), mode='constant', constant_values=0)
             batch_features.append(np.array(mfcc).T)
             if len(batch_features) >= batch_size:
                 yield np.array(batch_features), np.array(labels)
