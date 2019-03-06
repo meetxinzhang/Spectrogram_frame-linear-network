@@ -61,10 +61,11 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 16)
         print('pool3: ', pool3.get_shape().as_list())
 
-        x = tf.squeeze(pool3)  # (?, 10, 25, 16)
+        x = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 16)
 
-        # print('lstm :\n', x.get_shape().as_list())  # [?, 10, 25, 16]
+        print('lstm :\n', x.get_shape().as_list())  # [?, 10, 25, 16]
         ##################################################################
+        # 该方法效果非常不理想，原因在于将每个过滤器的 feature map 拼接在一起，然后让一个
         # x = tf.transpose(x, [0, 2, 1, 3])  # [?, 25, 10, 16]
         #
         # # print(x.get_shape().as_list())  # [?, 25, 10, 16]

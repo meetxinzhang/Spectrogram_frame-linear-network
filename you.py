@@ -20,7 +20,7 @@ chennel = 1
 rnn_units = 32
 num_class = 8
 
-learning_rate = 0.001
+learning_rate = 0.01
 training_iters = 2500
 batch_size = 50
 display_step = 1
@@ -28,17 +28,14 @@ display_step = 1
 path = 'sounds/'
 fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
 
-batch_x, batch_y = fuckdata.next_batch(batch_size=batch_size)
-batch_x = tf.cast(batch_x, dtype=tf.float32)
-batch_y = tf.cast(batch_y, tf.int32)
 # [5, 80, 200, 1]
 
-# x = tf.placeholder("float", [None, depth, height, wigth, chennel])
-# y = tf.placeholder("float", [None, num_class])
+x = tf.placeholder("float", [None, depth, height, wigth, chennel])
+y = tf.placeholder("float", [None, num_class])
 
 ##############################################
 t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, batch_size=batch_size, num_class=num_class)
-pred = t3lm.call(batch_x, training=True)
+pred = t3lm.call(x, training=True)
 
 ##############################################
 # x = tf.placeholder("float", [None, height, wigth])
@@ -63,9 +60,9 @@ pred = t3lm.call(batch_x, training=True)
 # pred = RNN(x, weights, biases)
 #############################################
 
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=batch_y))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
 optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate, momentum=0.9).minimize(cost)
-correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(batch_y, 1))
+correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 init = tf.global_variables_initializer()
@@ -74,12 +71,12 @@ sess.run(init)
 
 step = 1
 while step * batch_size < training_iters:
-    # batch_x, batch_y = fuckdata.next_batch(batch_size=batch_size)
+    batch_x, batch_y = fuckdata.next_batch(batch_size=batch_size)
     # batch_x = batch_x.reshape((batch_size, height, wigth))
-    sess.run(optimizer)
+    sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
     if step % display_step == 0:
-        acc = sess.run(accuracy)
-        loss = sess.run(cost)
+        acc = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
+        loss = sess.run(cost, feed_dict={x: batch_x, y: batch_y})
         print("Iter " + str(step*batch_size) + ", Minibatch Loss = " + \
             "{:.6f}".format(loss) + ", Training Accuracy = " + \
             "{:.5f}".format(acc))
