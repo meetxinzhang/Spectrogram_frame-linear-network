@@ -12,7 +12,7 @@ sess = tf.InteractiveSession()
 # batch_size = 64
 
 # model
-depth = 5
+depth = 10
 height = 80
 wigth = 200
 chennel = 1

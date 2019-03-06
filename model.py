@@ -14,7 +14,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.conv3d1 = tf.keras.layers.Conv3D(
             filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True, activation=tf.nn.relu, padding='same')
 
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[1, 2, 2], strides=[1, 2, 2], padding='same')
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same')
         self.conv3d2 = tf.keras.layers.Conv3D(
             filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True, activation=tf.nn.relu, padding='same')
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same')
@@ -42,7 +42,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         """
         :param **kwargs:
         :param **kwargs:
-        :param input: [?, 5, 80, 200, 1]
+        :param input: [?, 10, 80, 200, 1]
         :return:
         """
         print(type(inputs))
