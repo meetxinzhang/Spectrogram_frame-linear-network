@@ -46,6 +46,8 @@ class input_data(object):
         return file_list, lab_list
 
     def next_batch(self, batch_size):
+        print('next_batch', self.file_point)
+
         max = len(self.filenames)
 
         end = self.file_point + batch_size
@@ -91,6 +93,7 @@ class input_data(object):
 
             self.file_point += 1
 
+        print(np.shape(np.asarray(x_data, dtype=np.float32)))
         return np.asarray(x_data, dtype=np.float32), np.asarray(y_data, dtype=np.int32)
 
     # def next_batch(self, batch_size, num_class):

@@ -54,7 +54,7 @@ def cal_features(y, sr, height=80):
     # chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     # print('chroma: ', chroma.shape)
 
-    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512)
+    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512, power=2.0)
     logspec = librosa.amplitude_to_db(mel)
     # print('logsmel: ', logsmel.shape)
 
