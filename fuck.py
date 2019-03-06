@@ -10,10 +10,15 @@ from class_names import class_names
 
 class input_data(object):
 
-    def __init__(self, train_file_dir):
+    def __init__(self, train_file_dir, depth=5, height=80, width=200, num_class=8):
         self.batch_index = 0
         self.file_point = 0
+
         self.filenames, self.labels = self.get_filenames(train_file_dir)
+        self.depth = depth
+        self.height = height
+        self.width = width
+        self.num_class = num_class
 
     def get_filenames(self, train_file_dir):
         filenames = []
@@ -32,16 +37,15 @@ class input_data(object):
         temp = temp.transpose()
         # 随机打乱顺序
         np.random.shuffle(temp)
-        a = list(temp[:, 0])
-        b = list(temp[:, 1])
+        file_list = list(temp[:, 0])
+        lab_list = list(temp[:, 1])
 
         # labels = [int(i) for i in labels]
-        print("get the following labels ：")
-        print(b)
+        print("总共有数据 ：", len(lab_list))
 
-        return a, b
+        return file_list, lab_list
 
-    def next_batch(self, batch_size, num_class):
+    def next_batch(self, batch_size):
         max = len(self.filenames)
 
         end = self.file_point + batch_size
@@ -56,7 +60,8 @@ class input_data(object):
             imagePath = self.filenames[self.file_point]
             try:
                 # [5, 80, 200]
-                features = audio2mat.get_features_3dmat(imagePath)
+                features = audio2mat.get_features_3dmat(
+                    imagePath, depth=self.depth, height=self.height, width=self.width)
             except EOFError:
                 print('EOFError', imagePath)
                 self.file_point += 1
@@ -74,13 +79,12 @@ class input_data(object):
 
             # 添加颜色通道
             features = np.expand_dims(features, axis=-1)
-            print('fuck: 76 expand_dims', features.shape)
             # features = features.reshape([5, 80, 200, 1])
 
             # print('mfcc.shape paded: ', features.shape)
             x_data.append(features)  # (image.data, dtype='float32')
 
-            one_hot = np.zeros(int(num_class), dtype=np.int32)
+            one_hot = np.zeros(int(self.num_class), dtype=np.int32)
             one_hot[int(self.labels[self.file_point])] = 1
 
             y_data.append(one_hot)

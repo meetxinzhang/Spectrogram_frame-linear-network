@@ -1,4 +1,5 @@
 import librosa.display
+from MyException import MyException
 
 
 def get_features_3dmat(fileneme, depth, height, width):
@@ -6,8 +7,9 @@ def get_features_3dmat(fileneme, depth, height, width):
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
 
-    if len(features3d) < 5:
-        raise Exception('该数据时长不够：', fileneme)
+    if len(features3d) < depth:
+        # 时长： 10.5， len=8
+        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
     return features3d
 
@@ -52,7 +54,7 @@ def cal_features(y, sr, height=80):
     # chroma = librosa.feature.chroma_stft(y=y, sr=sr)
     # print('chroma: ', chroma.shape)
 
-    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, overlapping=512)
+    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512)
     logspec = librosa.amplitude_to_db(mel)
     # print('logsmel: ', logsmel.shape)
 

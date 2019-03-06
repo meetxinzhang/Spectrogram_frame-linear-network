@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 class The3dcnn_lstm_Model(tf.keras.Model):
@@ -38,20 +39,20 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         """
         :param **kwargs:
         :param **kwargs:
-        :param input: (?, 80, 200, 10, 1)   # [?, 5, 80, 200, 1]
+        :param input: [?, 5, 80, 200, 1]
         :return:
         """
         conv1 = self.conv3d1(inputs)
         pool1 = self.pooling1(conv1)  # (?, 5, 40, 100, 8)
-        # print('pool1: ', pool1.get_shape().as_list())
+        print('pool1: ', tf.shape(pool1))
 
         conv2 = self.conv3d2(pool1)
         pool2 = self.pooling2(conv2)  # (?, 3, 20, 50, 32)
-        # print('pool2: ', pool2.get_shape().as_list())
+        print('pool2: ', tf.shape(pool2))
 
         conv3 = self.conv3d3(pool2)
         pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 16)
-        # print('pool3: ', pool3.get_shape().as_list())
+        print('pool3: ', tf.shape(pool3))
 
         x = tf.squeeze(pool3)  # (?, 10, 25, 16)
         # print('lstm :\n', x.get_shape().as_list())  # [?, 10, 25, 16]
@@ -59,8 +60,9 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         # print(x.get_shape().as_list())  # [?, 25, 10, 16]
         # treat `feature_w` as max_timestep in lstm.
-        x = tf.reshape(x, [self.batch_size, -1, self.rnn_units])
-        # print('lstm input shape: {}'.format(x.get_shape().as_list()))  # [?, 25, 160]
+        # vac_len = tf.shape(x)[2] * tf.shape(x)[3]
+        x = tf.reshape(x, [self.batch_size, 25, 160])
+        print('lstm input shape: {}'.format(tf.shape(x)))  # [?, 25, 160]
 
         outputs1, _ = self.gru1(x)  # [?, 25, 1024]
         outputs2, _ = self.gru2(outputs1)  # [?, 25, 1024]

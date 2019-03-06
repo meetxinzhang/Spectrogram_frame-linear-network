@@ -6,32 +6,33 @@ import numpy as np
 import fuck
 
 
-path = 'sounds/'
-fuckdata = fuck.input_data(path)
-# [5, 80, 200, 1]
-
 # learning_rate = 0.00001
 # training_iters = 300000 #steps
 # batch_size = 64
 
 # model
+depth = 5
 height = 80
 wigth = 200
-depth = 5
 chennel = 1
-rnn_units = 1024
-n_classes = 8
 
-learning_rate = 0.001
-training_iters = 100000
-batch_size = 10
+rnn_units = 1024
+num_class = 8
+
+learning_rate = 0.01
+training_iters = 2500
+batch_size = 50
 display_step = 1
 
+path = 'sounds/'
+fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
+# [5, 80, 200, 1]
+
 x = tf.placeholder("float", [None, depth, height, wigth, chennel])
-y = tf.placeholder("float", [None, n_classes])
+y = tf.placeholder("float", [None, num_class])
 
 ##############################################
-t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, batch_size=batch_size, num_class=n_classes)
+t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, batch_size=batch_size, num_class=num_class)
 pred = t3lm.call(x, training=True)
 
 ##############################################
@@ -67,12 +68,12 @@ with tf.Session() as sess:
     sess.run(init)
     step = 1
     while step * batch_size < training_iters:
-        batch_x, batch_y = fuckdata.next_batch(batch_size=batch_size, num_class=n_classes)
+        batch_x, batch_y = fuckdata.next_batch(batch_size=batch_size)
         # batch_x = batch_x.reshape((batch_size, height, wigth))
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
         if step % display_step == 0:
             acc = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
-            loss = sess.run(cost, feed_dict={x: batch_x, y : batch_y})
+            loss = sess.run(cost, feed_dict={x: batch_x, y: batch_y})
             print("Iter " + str(step*batch_size) + ", Minibatch Loss = " + \
                 "{:.6f}".format(loss) + ", Training Accuracy = " + \
                 "{:.5f}".format(acc))
