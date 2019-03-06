@@ -1,8 +1,6 @@
-class_names = '''Accipiter+gentilis
-Anser+anser
+class_names = '''Anser+anser
 Ardea+cinerea
 Buteo+buteo
 Cuculus+micropterus
 Oriolus+oriolus
-Phasianus+colchicus
-Tachybaptus+ruficollis'''.split("\n")
+Phasianus+colchicus'''.split("\n")

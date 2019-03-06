@@ -6,9 +6,13 @@ def get_features_3dmat(fileneme, depth, height, width):
     y, sr = librosa.load(fileneme, sr=None)
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
+    len_feat = len(features3d)
 
-    if len(features3d) < depth:
+    if len_feat < depth:
         # 时长： 10.5， len=8
+
+
+
         raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
     return features3d

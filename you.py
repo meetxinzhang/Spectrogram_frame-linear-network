@@ -18,7 +18,7 @@ wigth = 200
 chennel = 1
 
 rnn_units = 32
-num_class = 8
+num_class = 6
 
 learning_rate = 0.01
 training_iters = 2500
