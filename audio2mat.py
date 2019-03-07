@@ -1,6 +1,7 @@
 import librosa.display
 from MyException import MyException
 import numpy as np
+import cv2
 
 
 def get_features_3dmat(fileneme, depth, height, width):
@@ -8,21 +9,20 @@ def get_features_3dmat(fileneme, depth, height, width):
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
 
-    # if len(features3d) == 0:
-    #     raise Exception('该数据 depth==0：{}'.format(fileneme))
-    #
-    # while len(features3d) < depth:
-    #     for i in range(len(features3d)):
-    #         piece_add = features3d[i]
-    #         features3d.append(piece_add)
-    #
-    #         if len(features3d) == 10:
-    #             break
-    len_feat = len(features3d)
+    if len(features3d) == 0:
+        raise MyException('该数据 depth==0：{}'.format(fileneme))
 
-    if len_feat < depth:
-        # 时长： 10.5， len=8
-        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
+    while len(features3d) < depth:
+        for i in range(len(features3d)):
+            piece_add = features3d[i]
+            features3d.append(piece_add)
+
+            if len(features3d) == 10:
+                break
+    # len_feat = len(features3d)
+    # if len_feat < depth:
+    #     # 时长： 10.5， len=8
+    #     raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
     return features3d
 
@@ -49,6 +49,10 @@ def stack_features(y, sr, depth=5, bands=80, frames=200):
             features2d = cal_features(y=signal, sr=sr, height=bands)
             # print('111111', np.shape(features2d))
             # logspec = logspec.T.flatten()[:, np.newaxis].T
+
+            # blur = cv.bilateralFilter（img，9,75,75）
+            kernel = np.ones((3, 3), np.float32) / 25
+            features2d = cv2.filter2D(features2d, -1, kernel)
             features3d.append(features2d)
 
     return features3d[0:depth]

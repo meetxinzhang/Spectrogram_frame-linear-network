@@ -20,7 +20,7 @@ chennel = 1
 rnn_units = 32
 num_class = 5
 
-learning_rate = 0.005
+learning_rate = 0.01
 training_iters = 2500
 batch_size = 64
 display_step = 1

@@ -1,10 +1,6 @@
 import tensorflow as tf
+import sys
 import numpy as np
-
-
-def weight_variable_xavier(shape):
-    initial = tf.contrib.layers.xavier_initializer_conv2d(seed=seed)
-    return tf.Variable(initial(shape))
 
 
 class The3dcnn_lstm_Model(tf.keras.Model):
@@ -16,23 +12,34 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.num_class = num_class
 
         # 3DCNN
-        self.conv3d1 = tf.keras.layers.Conv3D(
-            filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-            activation=tf.nn.relu, padding='same', kernel_initializer=weight_variable_xavier)
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same')
+        self.conv3d1 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                              bias_initializer=tf.zeros_initializer(),
+                                              data_format='channels_last')
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+                                                  data_format='channels_last')
 
-        self.conv3d2 = tf.keras.layers.Conv3D(
-            filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-            activation=tf.nn.relu, padding='same', kernel_initializer=weight_variable_xavier)
-        self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same')
+        self.conv3d2 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                              bias_initializer=tf.zeros_initializer(),
+                                              data_format='channels_last')
+        self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+                                                  data_format='channels_last')
 
-        self.conv3d3 = tf.keras.layers.Conv3D(
-            filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-            activation=tf.nn.relu, padding='same', kernel_initializer=weight_variable_xavier)
-        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 3], strides=[3, 2, 2], padding='same')
+        self.conv3d3 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                              bias_initializer=tf.zeros_initializer(),
+                                              data_format='channels_last')
+        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 3], strides=[3, 2, 2], padding='same',
+                                                  data_format='channels_last')
 
         # FC
-        self.fc = tf.keras.layers.Dense(units=num_class, kernel_initializer=weight_variable_xavier)
+        self.fc = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
+                                        kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                        bias_initializer=tf.constant_initializer)
         self.dropout = tf.keras.layers.Dropout(0.7)
 
     def call(self, inputs, training=False, **kwargs):
@@ -62,7 +69,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         print('lstm :\n', x.get_shape().as_list())  # [?, 10, 25, 16]
         ##################################################################
-        # 该方法效果非常不理想，原因在于将每个过滤器的 feature map 拼接在一起，然后让一个
+        # 该方法效果不理想
         # x = tf.transpose(x, [0, 2, 1, 3])  # [?, 25, 10, 16]
         #
         # # print(x.get_shape().as_list())  # [?, 25, 10, 16]
@@ -82,10 +89,9 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         channel = x.get_shape().as_list()[-1]
         rnn_output = []
         for channel_index in range(channel):
-
             name = "gru_" + str(channel_index)
             item_x = tf.transpose(h_conv3_features[channel_index], [0, 2, 1])  # [?, 25, 10] for item in 16
-            cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units)
+            cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
             item_out = cell(inputs=item_x)  # [?, 25, 32]
             cell = None
 
@@ -101,14 +107,3 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         print('logits: ', logits)
         return logits
-
-    # def RNN(self, X_in, _name):
-    #
-    #     # cell = tf.keras.layers.CuDNNGRU(units=self.rnn_units, name=_name)
-    #     # _GRU_O, _GRU_S = cell(X_in)  # [?, 25, 32]
-    #     cell = tf.contrib.rnn.GRUCell(self.rnn_units)
-    #     initial_state = cell.zero_state(self.batch_size, dtype=tf.float32)
-    #     _GRU_O, _GRU_S = tf.nn.dynamic_rnn(cell, X_in, initial_state=initial_state, dtype=tf.float32)
-    #
-    #     return _GRU_O[:, -1, :]  # [?, 32]
-

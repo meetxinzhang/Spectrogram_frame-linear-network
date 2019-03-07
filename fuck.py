@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import audio2mat
+from MyException import MyException
 from class_names import class_names
 
 
@@ -66,7 +67,7 @@ class input_data(object):
                 self.file_point += 1
                 end += 1
                 continue
-            except Exception as e:
+            except MyException as e:
                 print(e.args)
                 self.file_point += 1
                 end += 1
