@@ -10,7 +10,7 @@ from class_names import class_names
 
 class input_data(object):
 
-    def __init__(self, train_file_dir, depth=5, height=80, width=200, num_class=8):
+    def __init__(self, train_file_dir, depth=10, height=80, width=200, num_class=8):
         self.batch_index = 0
         self.file_point = 0
 
@@ -59,9 +59,10 @@ class input_data(object):
         y_data = []  # zero-filled list for 'one hot encoding'
 
         while self.file_point < end:
+            print('process: ', self.file_point, end)
             imagePath = self.filenames[self.file_point]
             try:
-                # [5, 80, 200]
+                # [10, 80, 200]
                 features = audio2mat.get_features_3dmat(
                     imagePath, depth=self.depth, height=self.height, width=self.width)
             except EOFError:
@@ -93,7 +94,7 @@ class input_data(object):
 
             self.file_point += 1
 
-        print(np.shape(np.asarray(x_data, dtype=np.float32)))
+        # print(np.shape(np.asarray(x_data, dtype=np.float32)))
         return np.asarray(x_data, dtype=np.float32), np.asarray(y_data, dtype=np.int32)
 
     # def next_batch(self, batch_size, num_class):

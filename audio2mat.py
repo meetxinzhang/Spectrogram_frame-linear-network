@@ -1,20 +1,23 @@
 import librosa.display
-from MyException import MyException
+import numpy as np
 
 
 def get_features_3dmat(fileneme, depth, height, width):
     y, sr = librosa.load(fileneme, sr=None)
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
-    len_feat = len(features3d)
 
-    if len_feat < depth:
-        # 时长： 10.5， len=8
+    if len(features3d) == 0:
+        raise Exception('该数据 depth==0：{}'.format(fileneme))
 
+    while len(features3d) < depth:
+        for i in range(len(features3d)):
+            piece_add = features3d[i]
+            features3d.append(piece_add)
 
-
-        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
-
+            if len(features3d) == 10:
+                break
+    # print('1111', np.shape(features3d))
     return features3d
 
 
@@ -87,7 +90,6 @@ def cal_features(y, sr, height=80):
     # plt.show()
     return logspec
 
-
 # def get_mp3_tus(fileneme_batch):
 #     i = 0
 #     img_s = []
@@ -107,5 +109,3 @@ def cal_features(y, sr, height=80):
 #         i = i + 1
 #
 #     return img_s
-
-
