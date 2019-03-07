@@ -2,6 +2,11 @@ import tensorflow as tf
 import numpy as np
 
 
+def weight_variable_xavier(shape):
+    initial = tf.contrib.layers.xavier_initializer_conv2d(seed=seed)
+    return tf.Variable(initial(shape))
+
+
 class The3dcnn_lstm_Model(tf.keras.Model):
 
     def __init__(self, rnn_units, batch_size, num_class):
@@ -12,30 +17,22 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         # 3DCNN
         self.conv3d1 = tf.keras.layers.Conv3D(
-            filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True, activation=tf.nn.relu, padding='same')
-
+            filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+            activation=tf.nn.relu, padding='same', kernel_initializer=weight_variable_xavier)
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same')
+
         self.conv3d2 = tf.keras.layers.Conv3D(
-            filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True, activation=tf.nn.relu, padding='same')
+            filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+            activation=tf.nn.relu, padding='same', kernel_initializer=weight_variable_xavier)
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same')
+
         self.conv3d3 = tf.keras.layers.Conv3D(
-            filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True, activation=tf.nn.relu, padding='same')
+            filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+            activation=tf.nn.relu, padding='same', kernel_initializer=weight_variable_xavier)
         self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 3], strides=[3, 2, 2], padding='same')
 
-        # Reshape
-        # self.flatten = tf.keras.layers.Reshape(target_shape=[-1, 10, 25, 16])
-
-        # LSTM
-        if tf.test.is_gpu_available:
-            self.gru1 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True, return_state=True)
-            self.gru2 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True, return_state=True)
-            self.gru3 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True, return_state=True)
-        else:
-            print('gpu 不可用')
-            assert False
-
         # FC
-        self.fc = tf.keras.layers.Dense(units=num_class, activation=tf.nn.relu)
+        self.fc = tf.keras.layers.Dense(units=num_class, kernel_initializer=weight_variable_xavier)
         self.dropout = tf.keras.layers.Dropout(0.7)
 
     def call(self, inputs, training=False, **kwargs):
@@ -88,7 +85,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
             name = "gru_" + str(channel_index)
             item_x = tf.transpose(h_conv3_features[channel_index], [0, 2, 1])  # [?, 25, 10] for item in 16
-            cell = tf.keras.layers.CuDNNGRU(units=self.rnn_units)
+            cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units)
             item_out = cell(inputs=item_x)  # [?, 25, 32]
             cell = None
 

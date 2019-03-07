@@ -18,11 +18,11 @@ wigth = 200
 chennel = 1
 
 rnn_units = 32
-num_class = 6
+num_class = 5
 
-learning_rate = 0.01
+learning_rate = 0.005
 training_iters = 2500
-batch_size = 50
+batch_size = 64
 display_step = 1
 
 path = 'sounds/'

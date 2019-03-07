@@ -1,4 +1,5 @@
 import librosa.display
+from MyException import MyException
 import numpy as np
 
 
@@ -7,17 +8,22 @@ def get_features_3dmat(fileneme, depth, height, width):
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
 
-    if len(features3d) == 0:
-        raise Exception('该数据 depth==0：{}'.format(fileneme))
+    # if len(features3d) == 0:
+    #     raise Exception('该数据 depth==0：{}'.format(fileneme))
+    #
+    # while len(features3d) < depth:
+    #     for i in range(len(features3d)):
+    #         piece_add = features3d[i]
+    #         features3d.append(piece_add)
+    #
+    #         if len(features3d) == 10:
+    #             break
+    len_feat = len(features3d)
 
-    while len(features3d) < depth:
-        for i in range(len(features3d)):
-            piece_add = features3d[i]
-            features3d.append(piece_add)
+    if len_feat < depth:
+        # 时长： 10.5， len=8
+        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
-            if len(features3d) == 10:
-                break
-    # print('1111', np.shape(features3d))
     return features3d
 
 

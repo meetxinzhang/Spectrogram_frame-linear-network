@@ -1,7 +1,3 @@
-# # A script to load images and make batch.
-# # Dependency: 'nibabel' to load MRI (NIFTI) images
-# # Reference: http://blog.naver.com/kjpark79/220783765651
-#
 import os
 import numpy as np
 import audio2mat
@@ -59,7 +55,7 @@ class input_data(object):
         y_data = []  # zero-filled list for 'one hot encoding'
 
         while self.file_point < end:
-            print('process: ', self.file_point, end)
+            # print('progress:{} and batch_end={}'.format(self.file_point, end), end="\r")
             imagePath = self.filenames[self.file_point]
             try:
                 # [10, 80, 200]
