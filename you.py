@@ -17,7 +17,7 @@ height = 80
 wigth = 200
 chennel = 1
 
-rnn_units = 64
+rnn_units = 128
 num_class = 4
 
 learning_rate = 0.01
@@ -82,17 +82,6 @@ while step * batch_size < training_iters:
             "{:.5f}".format(acc))
     step += 1
 print("Optimization Finished!")
-
-
-
-
-
-
-
-
-
-
-
 
 
 # import tensorflow as tf

@@ -84,7 +84,6 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         print('pool4: ', pool4.get_shape().as_list())
 
         x = tf.squeeze(pool4, axis=1)  # (?, 5, 13, 16)
-
         print('lstm :\n', x.get_shape().as_list())  # [?, 5, 13, 16]
         ##################################################################
         # 版本一 该方法效果不理想, 减小了10个百分点
@@ -103,23 +102,44 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # output = outputs3[:, -1, :]  # [?, 1024]
         ####################################################################
         # 版本二
-        h_conv3_features = tf.unstack(x, axis=-1)  # [[?, 5, 13], ....16]
-        channel = x.get_shape().as_list()[-1]
+        # h_conv3_features = tf.unstack(x, axis=-1)  # [[?, 5, 13], ....16]
+        # channel = x.get_shape().as_list()[-1]
+        # rnn_output = []
+        # for channel_index in range(channel):
+        #     name = "gru_" + str(channel_index)
+        #     item_x = tf.transpose(h_conv3_features[channel_index], [0, 2, 1])  # [?, 13, 5] for item in 16
+        #     cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name=name)
+        #     cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
+        #
+        #     item_out = cell1(inputs=item_x)  # [?, 13, rnn_units]
+        #     item_out = cell2(inputs=item_out)  # [?, rnn_units]
+        #     cell1 = None
+        #     cell2 = None
+        #
+        #     rnn_output.append(item_out)
+        # output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16]
+        #####################################################################
+        # 版本三 [?, 5, 13, 16]
+        x = tf.transpose(x, [0, 2, 1, 3])  # [?, 13, 5, 16]
+        print(x.get_shape().as_list())
+        x = tf.reshape(x, [self.batch_size, 13, 16*5])
+        print('lstm input shape: {}'.format(x.get_shape().as_list()))  # [?, 25, 80]
+
         rnn_output = []
-        for channel_index in range(channel):
-            name = "gru_" + str(channel_index)
-            item_x = tf.transpose(h_conv3_features[channel_index], [0, 2, 1])  # [?, 13, 5] for item in 16
-            cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name=name)
+        for index in range(self.num_class):
+            name = "lstm_" + str(index)
+
+            cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False,
+                                              name=name)
             cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
 
-            item_out = cell1(inputs=item_x)  # [?, 13, rnn_units]
+            item_out = cell1(inputs=x)  # [?, 13, rnn_units]
             item_out = cell2(inputs=item_out)  # [?, rnn_units]
             cell1 = None
             cell2 = None
 
             rnn_output.append(item_out)
-
-        output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16]
+        output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*4]
 
         if training:
             d = self.dropout(output)
