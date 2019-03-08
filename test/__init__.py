@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 #
 #
-y, sr = librosa.load('D:/GitHub/ProjectX/test.mp3', sr=None)
+y, sr = librosa.load('D:/GitHub/ProjectX/sounds/Anser+anser/Anser anser/Anser anser_42006.mp3', sr=None)
 #
 # # 语谱图 ,也叫时频域谱,最基本的物理特征 4 you  np.ndarray [shape=(1 + n_fft/2, t), dtype=dtype]
 # stft = librosa.core.stft(y, n_fft=1024, hop_length=512)

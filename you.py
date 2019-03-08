@@ -17,8 +17,8 @@ height = 80
 wigth = 200
 chennel = 1
 
-rnn_units = 32
-num_class = 5
+rnn_units = 64
+num_class = 4
 
 learning_rate = 0.01
 training_iters = 2500
