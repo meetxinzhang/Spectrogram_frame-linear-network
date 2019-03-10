@@ -1,20 +1,24 @@
 import librosa.display
 import numpy as np
+import scipy.misc
 import matplotlib.pyplot as plt
 import cv2
 #
 #
-y, sr = librosa.load('D:/GitHub/ProjectX/sounds/Anser+anser/Anser anser/Anser anser_42006.mp3', sr=None)
+# y, sr = librosa.load('D:/GitHub/ProjectX/test.mp3', sr=44100)
+# t = len(y) / sr
+# print(sr, t)
 #
 # # 语谱图 ,也叫时频域谱,最基本的物理特征 4 you  np.ndarray [shape=(1 + n_fft/2, t), dtype=dtype]
 # stft = librosa.core.stft(y, n_fft=1024, hop_length=512)
 # stft = librosa.amplitude_to_db(stft)
 # print('stft', stft.shape)
 #
-# # Mel频率倒谱系数 laji
-# # mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=80)
-# # mfcc = librosa.amplitude_to_db(mfcc)
-# # print('mfccs: ', mfccs.shape)
+# Mel频率倒谱系数 laji
+# mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=80)
+# mfcc = librosa.amplitude_to_db(mfcc)
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/mfcc.jpg', mfcc)
+# print('mfccs: ', mfccs.shape)
 #
 # # 色度频率 laji
 # # chroma = librosa.feature.chroma_stft(y=y, sr=sr)
@@ -22,23 +26,37 @@ y, sr = librosa.load('D:/GitHub/ProjectX/sounds/Anser+anser/Anser anser/Anser an
 # # print('chroma: ', chroma.shape)
 #
 # #  xishu
-mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=80, n_fft=1024, hop_length=512, power=2.0)
-mel = librosa.amplitude_to_db(mel)
-# # print('logsmel: ', logsmel.shape)
-#
-# # 计算光谱对比 laji
-# # contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
-# # contrast = librosa.amplitude_to_db(contrast)
-# # print('contrast: ', contrast.shape)
-#
-# # 光谱质心 laji
-# # tonnetz = librosa.feature.tonnetz(y=librosa.effects.harmonic(y), sr=sr)
-# # print('tonnetz: ', tonnetz.shape)
-#
+"""
+梅尔标度，the mel scale，由Stevens，Volkmann和Newman在1937年命名/
+我们知道，频率的单位是赫兹（Hz），人耳能听到的频率范围是20-20000Hz，但人耳对Hz这种标度单位并不是线性感知关系。
+例如如果我们适应了1000Hz的音调，如果把音调频率提高到2000Hz，我们的耳朵只能觉察到频率提高了一点点，根本察觉不到频率提高了一倍。
+如果将普通的频率标度转化为梅尔频率标度
+mel(f) = 2595*log10(1+f/700)
+--------------------- 
+
+原文：https://blog.csdn.net/qq_28006327/article/details/59129110 
+版权声明：本文为博主原创文章，转载请附上博文链接！
+"""
+# mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=80, n_fft=1024, hop_length=512, power=2.0)
+# mel = librosa.amplitude_to_db(mel)
+# mel_delta = librosa.feature.delta(mel)
+# # scipy.misc.imsave('D:/GitHub/ProjectX/test/mel.jpg', mel)
+# # # print('logsmel: ', logsmel.shape)
+# #
+# # # 计算光谱对比 laji
+# # # contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
+# # # contrast = librosa.amplitude_to_db(contrast)
+# # # print('contrast: ', contrast.shape)
+# #
+# # # 光谱质心 laji
+# # # tonnetz = librosa.feature.tonnetz(y=librosa.effects.harmonic(y), sr=sr)
+# # # print('tonnetz: ', tonnetz.shape)
+# #
 # # 节拍， start_bpm 速度估计器的初始猜测（每分钟节拍） tai shao
-# # tempo, beat_times = librosa.beat.beat_track(y=y, sr=sr, start_bpm=500, units='time')
-# # print('beat_times', beat_times.shape)
+# tempo, beat_times = librosa.beat.beat_track(y=y, sr=sr, start_bpm=500, units='time')
 #
+# beat_mel_delta = librosa.util.sync(mel, beat_times)
+# #
 # # mohu
 # # oenv = librosa.onset.onset_strength(y=y, sr=sr, hop_length=512)
 # # tempogram = librosa.feature.tempogram(onset_envelope=oenv, sr=sr, hop_length=512)
@@ -48,11 +66,63 @@ mel = librosa.amplitude_to_db(mel)
 # # librosa.feature.tempogram
 #
 #
-kernel = np.ones((3, 3), np.float32) / 25
-mel = cv2.filter2D(mel, -1, kernel)
+# kernel = np.ones((3, 3), np.float32) / 25
+# mel = cv2.filter2D(mel, -1, kernel)
 
-librosa.display.specshow(mel, y_axis='chroma', x_axis='time')
-plt.colorbar()
-plt.title('Chromagram')
-plt.tight_layout()
-plt.show()
+
+# def windows(data, window_size):
+#     start = 0
+#     while start < len(data):
+#         yield start, start + window_size
+#         start += int(window_size / 2)
+#
+#
+# def stack_features(y, sr, depth=10, bands=80, frames=200):
+#     window_size = 512 * (frames - 1)
+#     features3d = []
+#
+#     for (start, end) in windows(y, window_size):
+#         # (1)此处是为了是将大小不一样的音频文件用大小window_size，
+#         # stride=window_size/2的窗口，分割为等大小的时间片段。
+#         # (2)计算每一个分割片段的log mel_sepctrogram.
+#         # 或者，先分别计算大小不一的音频的log mel_spectrogram,在通过固定的窗口，
+#         # 切割等大小的频谱图。
+#         if len(y[start:end]) == window_size:
+#             signal = y[start:end]
+#             features2d = librosa.feature.melspectrogram(y=signal, sr=sr, n_mels=bands, n_fft=1024, hop_length=512, power=2.0 p)
+#             features2d = librosa.amplitude_to_db(features2d)
+#             # print('111111', np.shape(features2d))
+#             # logspec = logspec.T.flatten()[:, np.newaxis].T
+#
+#             # blur = cv.bilateralFilter（img，9,75,75）
+#             # kernel = np.ones((3, 3), np.float32) / 25
+#             # features2d = cv2.filter2D(features2d, -1, kernel)
+#             features3d.append(features2d)
+#
+#     return features3d[0:depth]
+#
+#
+# features3d = stack_features(y, sr)
+#
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b0.jpg', features3d[0])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b1.jpg', features3d[1])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b2.jpg', features3d[2])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b3.jpg', features3d[3])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b4.jpg', features3d[4])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b5.jpg', features3d[5])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b6.jpg', features3d[6])
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/b7.jpg', features3d[7])
+# # scipy.misc.imsave('D:/GitHub/ProjectX/test/b8.jpg', features3d[8])
+# # scipy.misc.imsave('D:/GitHub/ProjectX/test/b9.jpg', features3d[9])
+#
+# features3d = np.concatenate(features3d, axis=1)
+# print(np.shape(features3d))
+# scipy.misc.imsave('D:/GitHub/ProjectX/test/aa+.jpg', features3d)
+#
+# librosa.display.specshow(beat_mel_delta, y_axis='mel', fmax=22100, x_axis='time')
+# plt.colorbar()
+# plt.title('Mel Power-Scaled Frequency Spectrogram')
+# plt.tight_layout()
+# plt.show()
+
+
