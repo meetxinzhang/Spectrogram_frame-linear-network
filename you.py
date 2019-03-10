@@ -1,7 +1,6 @@
 # coding=utf-8
 import tensorflow as tf
 import model
-import numpy as np
 import fuck
 
 sess = tf.InteractiveSession()
@@ -18,10 +17,13 @@ num_class = 4
 learning_rate = 0.05
 training_iters = 1582 * 50
 batch_size = 64
-epoch = 1
+epoch = 15
 display_step = 1
 
-# tensorboard --logdir=tensor_logs
+"""
+activate tf
+tensorboard --logdir=tensor_logs
+"""
 logs_path = 'tensor_logs/'
 path = ['sounds/', 'sounds_test/']
 fuckdata = fuck.input_data(train_file_dir=path[0], test_file_dir=path[1], depth=depth, height=height, width=wigth, num_class=num_class)
