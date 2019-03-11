@@ -17,7 +17,7 @@ num_class = 4
 learning_rate = 0.05
 training_iters = 1582 * 50
 batch_size = 64
-epoch = 15
+epoch = 3
 display_step = 1
 
 """
@@ -25,8 +25,8 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/'
-path = ['sounds/', 'sounds_test/']
-fuckdata = fuck.input_data(train_file_dir=path[0], test_file_dir=path[1], depth=depth, height=height, width=wigth, num_class=num_class)
+path = 'sounds/'
+fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
 
 # [5, 80, 200, 1]
 

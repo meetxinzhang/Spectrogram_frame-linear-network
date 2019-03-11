@@ -18,7 +18,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last',
                                               name='conv1')
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[1, 2, 2], strides=[1, 2, 2], padding='same',
                                                   data_format='channels_last', name='pool1')
 
         self.conv3d2 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
@@ -36,17 +36,17 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last',
                                               name='conv3')
-        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
+        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last', name='pool3')
 
-        # self.conv3d4 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-        #                                       activation=tf.nn.relu, padding='same',
-        #                                       kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
-        #                                       bias_initializer=tf.zeros_initializer(),
-        #                                       data_format='channels_last',
-        #                                       name='conv4')
-        # self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
-        #                                           data_format='channels_last', name='pool4')
+        self.conv3d4 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                              bias_initializer=tf.zeros_initializer(),
+                                              data_format='channels_last',
+                                              name='conv4')
+        self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
+                                                  data_format='channels_last', name='pool4')
 
         # # RNN
         # self.cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False)
@@ -73,26 +73,26 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         print(type(inputs))
         conv1 = self.conv3d1(inputs)
         conv1 = tf.layers.batch_normalization(conv1, training=True)
-        pool1 = self.pooling1(conv1)  # (?, 5, 40, 100, 28)
+        pool1 = self.pooling1(conv1)  # (?, 10, 40, 100, 28)
         print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
         conv2 = tf.layers.batch_normalization(conv2, training=True)
-        pool2 = self.pooling2(conv2)  # (?, 3, 20, 50, 32)
+        pool2 = self.pooling2(conv2)  # (?, 5, 20, 50, 32)
         print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)
         conv3 = tf.layers.batch_normalization(conv3, training=True)
-        pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 16)
+        pool3 = self.pooling3(conv3)  # (?, 3, 10, 25, 16)
         print('pool3: ', pool3.get_shape().as_list())
 
-        # conv4 = self.conv3d4(pool3)
-        # conv4 = tf.layers.batch_normalization(conv4, training=True)
-        # pool4 = self.pooling4(conv4)  # (?, 1, 5, 13, 4)
-        # print('pool4: ', pool4.get_shape().as_list())
+        conv4 = self.conv3d4(pool3)
+        conv4 = tf.layers.batch_normalization(conv4, training=True)
+        pool4 = self.pooling4(conv4)  # (?, 1, 5, 13, 4)
+        print('pool4: ', pool4.get_shape().as_list())
 
-        x = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 16)
-        print('lstm :\n', x.get_shape().as_list())  # [?, 10, 25, 16]
+        x = tf.squeeze(pool4, axis=1)  # (?, 5, 13, 4)
+        print('lstm :\n', x.get_shape().as_list())  # [?, 5, 13, 4]
         ##################################################################
         # 版本一 该方法效果不理想, 减小了10个百分点
         # x = tf.transpose(x, [0, 2, 1, 3])  # [?, 25, 10, 16]
@@ -156,10 +156,11 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         #     rnn_output.append(fc)
         # rnn_output = tf.squeeze(rnn_output, axis=2)  # [4, ?]
         # logits = tf.transpose(rnn_output)
-        # 版本四 [?, 10, 25, 16]
-        x = tf.transpose(x, [0, 2, 1, 3])  # [?, 25, 10, 16]
+        # 版本四 # [?, 5, 13, 4]
+        x = tf.transpose(x, [0, 2, 1, 3])  # [?, 13, 5, 4]
         batch_size = tf.shape(x)[0]
-        x = tf.reshape(x, [batch_size, 25, 160])
+        time = tf.shape(x)[1]
+        x = tf.reshape(x, [batch_size, time, 20])
         rnn_output = []
         for index in range(self.num_class):
             _name_end = str(index)

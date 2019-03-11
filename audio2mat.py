@@ -1,10 +1,11 @@
 import librosa.display
 from MyException import MyException
 import numpy as np
+import random
 import cv2
 
 
-def get_features_3dmat(fileneme, depth, height, width):
+def get_features_3dmat(fileneme, depth, height, width, training=True):
     y, sr = librosa.load(fileneme, sr=None)
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
@@ -12,6 +13,7 @@ def get_features_3dmat(fileneme, depth, height, width):
     if len(features3d) == 0:
         raise MyException('该数据 depth==0：{}'.format(fileneme))
 
+    # 填充
     while len(features3d) < depth:
         for i in range(len(features3d)):
             piece_add = features3d[i]
@@ -23,6 +25,19 @@ def get_features_3dmat(fileneme, depth, height, width):
     # if len_feat < depth:
     #     # 时长： 10.5， len=8
     #     raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
+
+    if training:
+        # 数据增强
+        # - 模拟队列数据结构，左平移每个特征图
+        seed_move = random.randint(0, 4)
+        for i in range(seed_move):
+            temp = features3d.pop(0)
+            features3d.append(temp)
+
+        # - 垂直翻转
+        seed_if = random.randint(0, 1)
+        if seed_if == 0:
+            features3d = np.flipud(features3d)
 
     return features3d
 
@@ -51,8 +66,9 @@ def stack_features(y, sr, depth=5, bands=80, frames=200):
             # logspec = logspec.T.flatten()[:, np.newaxis].T
 
             # blur = cv.bilateralFilter（img，9,75,75）
-            kernel = np.ones((3, 3), np.float32) / 25
-            features2d = cv2.filter2D(features2d, -1, kernel)
+            # kernel = np.ones((3, 3), np.float32) / 25
+            # features2d = cv2.filter2D(features2d, -1, kernel)
+
             features3d.append(features2d)
 
     return features3d[0:depth]
