@@ -1,13 +1,13 @@
 import librosa.display
-import numpy as np
-import scipy.misc
-import matplotlib.pyplot as plt
-import cv2
+# import numpy as np
+# import scipy.misc
+# import matplotlib.pyplot as plt
+# import cv2
 #
-#
-# y, sr = librosa.load('D:/GitHub/ProjectX/test.mp3', sr=44100)
-# t = len(y) / sr
-# print(sr, t)
+# conda install -c conda-forge librosa
+y, sr = librosa.load('D:/GitHub/ProjectX/test.mp3', sr=44100)
+t = len(y) / sr
+print(sr, t)
 #
 # # 语谱图 ,也叫时频域谱,最基本的物理特征 4 you  np.ndarray [shape=(1 + n_fft/2, t), dtype=dtype]
 # stft = librosa.core.stft(y, n_fft=1024, hop_length=512)

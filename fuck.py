@@ -81,17 +81,11 @@ class input_data(object):
 
     def next_batch(self, batch_size, epoch=1):
 
-        if self.epoch_index > epoch:
-            print('######################### 测试')
-            self.epoch_index = 1
-            self.file_point = 0
-            self.training = False
-            # self.filenames, self.labels = self.get_test_filenames(self.test_file_dir)
-
         if self.training:
             max = len(self.train_fnames)
         else:
             max = len(self.test_fnames)
+            print('######################### 测试')
 
         if self.file_point == max:
             if not self.training:
@@ -99,11 +93,14 @@ class input_data(object):
 
             self.epoch_index += 1
             self.file_point = 0
-            self.training = True
             # self.filenames, self.labels = self.get_filenames(self.train_file_dir)
-            print('######################### 训练 \n epoch=', self.epoch_index)
 
-        print('next_batch', self.file_point)
+        if self.epoch_index > epoch:
+            self.epoch_index = 1
+            self.file_point = 0
+            self.training = False
+
+        print('epoch={},point={}'.format(self.epoch_index, self.file_point))
 
         end = self.file_point + batch_size
 

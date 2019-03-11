@@ -27,17 +27,11 @@ def get_features_3dmat(fileneme, depth, height, width, training=True):
     #     raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
     if training:
-        # 数据增强
-        # - 模拟队列数据结构，左平移每个特征图
+        # 数据增强2 - 模拟队列数据结构，左平移每个特征图
         seed_move = random.randint(0, 4)
         for i in range(seed_move):
             temp = features3d.pop(0)
             features3d.append(temp)
-
-        # - 垂直翻转
-        seed_if = random.randint(0, 1)
-        if seed_if == 0:
-            features3d = np.flipud(features3d)
 
     return features3d
 
@@ -52,7 +46,7 @@ def windows(data, window_size):
 def stack_features(y, sr, depth=5, bands=80, frames=200):
     window_size = 512 * (frames - 1)
     features3d = []
-
+    seed_if = random.randint(0, 1)
     for (start, end) in windows(y, window_size):
         # (1)此处是为了是将大小不一样的音频文件用大小window_size，
         # stride=window_size/2的窗口，分割为等大小的时间片段。
@@ -68,6 +62,10 @@ def stack_features(y, sr, depth=5, bands=80, frames=200):
             # blur = cv.bilateralFilter（img，9,75,75）
             # kernel = np.ones((3, 3), np.float32) / 25
             # features2d = cv2.filter2D(features2d, -1, kernel)
+
+            # 数据增强1 - 垂直翻转
+            if seed_if == 0:
+                features2d = np.flipud(features2d)
 
             features3d.append(features2d)
 
