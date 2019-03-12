@@ -40,27 +40,6 @@ training = tf.placeholder(tf.bool)
 t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
 pred = t3lm.call(x, training=training, d_rate=drop_rate)
 
-##############################################
-# x = tf.placeholder("float", [None, height, wigth])
-# y = tf.placeholder("float", [None, n_classes])
-#
-# weights = {
-#     'out': tf.Variable(tf.random_normal([n_hidden, n_classes]))
-# }
-#
-# biases = {
-#     'out': tf.Variable(tf.random_normal([n_classes]))
-# }
-#
-#
-# def RNN(x, weights, biases):
-#     x = tf.unstack(x, n_steps, 1)
-#     lstm_cell = rnn.BasicLSTMCell(rnn_units, forget_bias=1.0)
-#     outputs, states = rnn.static_rnn(lstm_cell, x, dtype=tf.float32)
-#     return tf.matmul(outputs[-1], weights['out']) + biases['out']
-#
-#
-# pred = RNN(x, weights, biases)
 #############################################
 # 定义global_step
 global_step = tf.Variable(0, trainable=False)
