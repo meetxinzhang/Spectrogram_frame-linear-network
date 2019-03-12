@@ -7,6 +7,8 @@ import cv2
 
 def get_features_3dmat(fileneme, depth, height, width, training=True):
     y, sr = librosa.load(fileneme, sr=None)
+    if len(y)/sr < 2.3:
+        raise MyException('时长太短；{}')
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
 

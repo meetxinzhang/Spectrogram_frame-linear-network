@@ -126,7 +126,7 @@ class input_data(object):
                 end += 1
                 continue
             except MyException as e:
-                print(e.args)
+                # print(e.args)
                 self.file_point += 1
                 end += 1
                 continue
