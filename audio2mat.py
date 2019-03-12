@@ -2,7 +2,7 @@ import librosa.display
 from MyException import MyException
 import numpy as np
 import random
-import cv2
+# import cv2
 
 
 def get_features_3dmat(fileneme, depth, height, width, training=True):

@@ -44,10 +44,11 @@ pred = t3lm.call(x, training=training, d_rate=drop_rate)
 # 定义global_step
 global_step = tf.Variable(0, trainable=False)
 # 通过指数衰减函数来生成学习率
-learing_rate = tf.train.exponential_decay(0.1, global_step, 100, 0.96, staircase=False)
+learing_rate = tf.train.exponential_decay(0.05, global_step, batch_size*epoch, 0.96, staircase=False)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
-optimizer = tf.train.RMSPropOptimizer(learning_rate=learing_rate, momentum=0.9).minimize(cost, global_step)
+# optimizer = tf.train.RMSPropOptimizer(learning_rate=learing_rate, momentum=0.9).minimize(cost, global_step)
+optimizer = tf.train.AdamOptimizer(learning_rate=learing_rate).minimize(cost, global_step)
 correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
@@ -73,10 +74,10 @@ while step * batch_size < training_iters:
     learning_rate = 0.05 * (0.57 ** epoch_index)
     if epoch_index > epoch:
         t = True
-        d_rate = 0.3
+        d_rate = 0.8
     else:
         t = False
-        d_rate = 0
+        d_rate = 1
     # batch_x = batch_x.reshape((batch_size, height, wigth))
     _, summary = sess.run([optimizer, merged_summary_op],
                           feed_dict={x: batch_x, y: batch_y, training: t, drop_rate: d_rate})

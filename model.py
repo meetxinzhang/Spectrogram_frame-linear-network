@@ -69,7 +69,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         :return:
         """
         conv1 = self.conv3d1(inputs)
-        # conv1 = tf.layers.batch_normalization(conv1, training=training)
+        conv1 = tf.layers.batch_normalization(conv1, training=training)
         conv1 = tf.nn.relu(conv1)
         pool1 = self.pooling1(conv1)  # (?, 10, 40, 100, 14)
         print('pool1: ', pool1.get_shape().as_list())
@@ -81,7 +81,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)
-        # conv3 = tf.layers.batch_normalization(conv3, training=training)
+        conv3 = tf.layers.batch_normalization(conv3, training=training)
         conv3 = tf.nn.relu(conv3)
         pool3 = self.pooling3(conv3)  # (?, 3, 10, 25, 16)
         print('pool3: ', pool3.get_shape().as_list())
@@ -184,7 +184,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         pool4 = tf.keras.layers.Flatten()(pool4)
 
         fc1 = self.fc1(pool4)
-        d1 = tf.keras.layers.Dropout( rate=d_rate)(fc1)
+        d1 = tf.keras.layers.Dropout(rate=d_rate)(fc1)
         logits = self.fc2(d1)
 
         return logits

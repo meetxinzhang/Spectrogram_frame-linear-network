@@ -25,7 +25,8 @@ fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, widt
 
 
 def cal_loss(logits, lab_batch):
-    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=lab_batch, logits=logits)
+    print(tf.shape(logits), tf.shape(lab_batch))
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=lab_batch, logits=logits)
     loss = tf.reduce_mean(cross_entropy)
     return loss
 

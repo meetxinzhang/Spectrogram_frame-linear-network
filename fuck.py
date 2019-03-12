@@ -85,7 +85,6 @@ class input_data(object):
             max = len(self.train_fnames)
         else:
             max = len(self.test_fnames)
-            print('######################### 测试')
 
         if self.file_point == max:
             if not self.training:
@@ -98,7 +97,9 @@ class input_data(object):
         if self.epoch_index > epoch:
             self.epoch_index = 1
             self.file_point = 0
+            max = len(self.test_fnames)
             self.training = False
+            print('######################### 测试')
 
         print('epoch={},point={}'.format(self.epoch_index, self.file_point))
 
@@ -126,7 +127,7 @@ class input_data(object):
                 end += 1
                 continue
             except MyException as e:
-                # print(e.args)
+                print(e.args)
                 self.file_point += 1
                 end += 1
                 continue
