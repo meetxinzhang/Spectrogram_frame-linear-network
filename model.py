@@ -49,9 +49,8 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                                   data_format='channels_last', name='pool4')
 
         # # RNN
-        # self.cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False)
-        # self.cell2 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True, return_state=False)
-        # self.cell2 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True, return_state=False)
+        self.cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name='lstm1')
+        self.cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name='lstm2')
         #
         # FC
         self.fc1 = tf.keras.layers.Dense(units=128, use_bias=True, activation=tf.nn.relu,
@@ -61,7 +60,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                          kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
                                          bias_initializer=tf.constant_initializer)
 
-    def call(self, inputs, training=True, d_rate=0):
+    def call(self, inputs, training=True, dropout=0):
         """
         :param training:
         :param **kwargs:
@@ -92,23 +91,22 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         pool4 = self.pooling4(conv4)  # (?, 1, 5, 13, 8)
         print('pool4: ', pool4.get_shape().as_list())
 
-        x = tf.squeeze(pool4, axis=1)  # (?, 5, 13, 8)
-        print('lstm :\n', x.get_shape().as_list())  # [?, 5, 13, 8]
+        pool4 = tf.squeeze(pool4, axis=1)  # (?, 5, 13, 8)
+        print('lstm :\n', pool4.get_shape().as_list())  # [?, 5, 13, 8]
         ##################################################################
         # 版本一 该方法效果不理想, 减小了10个百分点
-        # x = tf.transpose(x, [0, 2, 1, 3])  # [?, 25, 10, 16]
-        #
-        # # print(x.get_shape().as_list())  # [?, 25, 10, 16]
-        # # treat `feature_w` as max_timestep in lstm.
-        # # vac_len = tf.shape(x)[2] * tf.shape(x)[3]
-        # x = tf.reshape(x, [self.batch_size, 25, 160])
-        # print('lstm input shape: {}'.format(x.get_shape().as_list()))  # [?, 25, 160]
-        #
-        # outputs1 = self.cell1(x)  # [?, 25, 1024]
-        # outputs2 = self.cell2(outputs1)  # [?, 25, 1024]
-        # outputs3 = self.cell2(outputs2)  # [?, 25, 1024]
-        #
-        # output = outputs3[:, -1, :]  # [?, 1024]
+        pool4 = tf.transpose(pool4, [0, 2, 1, 3])  # [?, 13, 5, 8]
+        print('lstm input shape: {}'.format(pool4.get_shape().as_list()))  # [?, 25, 160]
+
+        # print(x.get_shape().as_list())  # [?, 25, 10, 16]/
+        # treat `feature_w` as max_timestep in lstm.
+        # vac_len = tf.shape(x)[2] * tf.shape(x)[3]
+        pool4 = tf.reshape(pool4, [64, 13, 40])
+
+
+        outputs1 = self.cell1(pool4)  # [?, 13, 64]
+        outputs2 = self.cell2(outputs1)  # [?, 64]
+
         ####################################################################
         # 版本二
         # h_conv3_features = tf.unstack(x, axis=-1)  # [[?, 5, 13], ....16]
@@ -180,11 +178,11 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # logits = tf.transpose(rnn_output)
         #
         # print('logits: ', logits)
-        # 版本五 [?, 5, 13, 8]
-        pool4 = tf.keras.layers.Flatten()(pool4)
-
-        fc1 = self.fc1(pool4)
-        d1 = tf.keras.layers.Dropout(rate=d_rate)(fc1)
-        logits = self.fc2(d1)
+        # 版本五 3dcnn
+        # pool4 = tf.keras.layers.Flatten()(pool4)
+        #
+        # fc1 = self.fc1(pool4)
+        # d1 = tf.keras.layers.Dropout(rate=dropout)(fc1)
+        logits = self.fc2(outputs2)
 
         return logits

@@ -41,8 +41,8 @@ class input_data(object):
         filenames_list = list(temp[:, 0])
         lab_list = list(temp[:, 1])
 
-        n_train = len(filenames_list)
-        n_test = int(n_train*0.2)
+        n_total = len(filenames_list)
+        n_test = int(n_total*0.2)
 
         test_fnames = filenames_list[0:n_test]
         test_labs = lab_list[0:n_test]
@@ -50,34 +50,10 @@ class input_data(object):
         train_labs = lab_list[n_test+1:-1]
 
         # labels = [int(i) for i in labels]
-        print("训练数据 ：", n_train)
+        print("训练数据 ：", n_total-n_test)
         print("测试数据 ：", n_test)
 
         return train_fnames, train_labs, test_fnames, test_labs
-
-    # def get_test_filenames(self, test_file_dir):
-    #     filenames = []
-    #     labels = []
-    #     for train_class in os.listdir(test_file_dir):
-    #             for pic in os.listdir(test_file_dir + '/' + train_class):
-    #                 if os.path.isfile(test_file_dir + '/' + train_class + '/' + pic):
-    #                     filenames.append(test_file_dir + '/' + train_class + '/' + pic)
-    #                     label = class_names.index(train_class)
-    #                     labels.append(int(label))
-    #
-    #     temp = np.array([filenames, labels])
-    #     # 矩阵转置，将数据按行排列，一行一个样本，image位于第一维，label位于第二维
-    #     temp = temp.transpose()
-    #     # 随机打乱顺序
-    #     np.random.shuffle(temp)
-    #     file_list = list(temp[:, 0])
-    #     lab_list = list(temp[:, 1])
-    #
-    #     # labels = [int(i) for i in labels]
-    #     print("测试数据 ：", len(file_list))
-    #     print("测试标签 ：", len(lab_list))
-    #
-    #     return file_list, lab_list
 
     def next_batch(self, batch_size, epoch=1):
 
@@ -88,7 +64,7 @@ class input_data(object):
 
         if self.file_point == max:
             if not self.training:
-                raise MyException('no more batch!!!')
+                raise MyException('数据输送完成')
 
             self.epoch_index += 1
             self.file_point = 0
