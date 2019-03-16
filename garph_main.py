@@ -11,13 +11,13 @@ height = 80
 wigth = 200
 chennel = 1
 
-rnn_units = 64
+rnn_units = 256
 num_class = 4
 
 # learning_rate = 0.05
 training_iters = 1582 * 50
 batch_size = 64
-epoch = 15
+epoch = 5
 display_step = 1
 
 """
@@ -37,7 +37,7 @@ training = tf.placeholder(tf.bool)
 # 定义global_step
 global_step = tf.Variable(0, trainable=False)
 # 通过指数衰减函数来生成学习率
-learing_rate = tf.train.exponential_decay(0.05, global_step, 1, 0.96, staircase=False)
+learing_rate = tf.train.exponential_decay(0.1, global_step, 1000, 0.96, staircase=False)
 
 ##############################################
 t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)

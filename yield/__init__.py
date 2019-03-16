@@ -1,5 +1,5 @@
 # import os
-import numpy as np
+# import numpy as np
 # import librosa.display
 # import scipy.misc
 #
@@ -34,13 +34,3 @@ import numpy as np
 #
 # imagePath = 'D:/GitHub/ProjectX/sounds'
 # file2img(imagePath)
-
-list = [[[1,2,3],
-        [4,5,6]],
-
-        [[0,0,0],
-         [1,1,1]]]
-
-np.flipud(list[0])
-
-print(list)

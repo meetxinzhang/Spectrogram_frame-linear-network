@@ -1,13 +1,13 @@
-import librosa.display
+# import librosa.display
 # import numpy as np
 # import scipy.misc
 # import matplotlib.pyplot as plt
 # import cv2
 #
 # conda install -c conda-forge librosa
-y, sr = librosa.load('D:/GitHub/ProjectX/test.mp3', sr=44100)
-t = len(y) / sr
-print(sr, t)
+# y, sr = librosa.load('D:/GitHub/ProjectX/test.mp3', sr=44100)
+# t = len(y) / sr
+# print(sr, t)
 #
 # # 语谱图 ,也叫时频域谱,最基本的物理特征 4 you  np.ndarray [shape=(1 + n_fft/2, t), dtype=dtype]
 # stft = librosa.core.stft(y, n_fft=1024, hop_length=512)
@@ -125,4 +125,29 @@ mel(f) = 2595*log10(1+f/700)
 # plt.tight_layout()
 # plt.show()
 
+import tensorflow as tf
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
+
+# with tf.device('/gpu:0'):
+#     v1 = tf.constant([1.0, 2.0, 3.0], shape=[3], name='v1')
+#     v2 = tf.constant([1.0, 2.0, 3.0], shape=[3], name='v2')
+#     sumV12 = v1 + v2
+#
+#     with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
+#         print(sess.run(sumV12))
+
+
+# # 新建一个 graph.
+# a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+# b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+# c = tf.matmul(a, b)
+# # 新建session with log_device_placement并设置为True.
+# sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+# # 运行这个 op.
+# print(sess.run(c))
+
+
+# import pywt
+# cA, cD = pywt.dwt(y, 'db1')
+# print(np.shape(cA), np.shape(cD))

@@ -7,7 +7,7 @@ from class_names import class_names
 
 class input_data(object):
 
-    def __init__(self, train_file_dir, depth=10, height=80, width=200, num_class=8):
+    def __init__(self, train_file_dir, depth=10, height=80, width=200, num_class=4):
         self.train_file_dir = train_file_dir
         self.training = True
         self.epoch_index = 1
