@@ -12,7 +12,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.num_class = num_class
 
         # 3DCNN
-        self.conv3d1 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+        self.conv3d1 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.relu, padding='same',
                                               # kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
                                               bias_initializer=tf.zeros_initializer(),
@@ -49,8 +49,8 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         #                                           data_format='channels_last', name='pool4')
 
         # # RNN
-        self.cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name='lstm1')
-        self.cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name='lstm2')
+        # self.cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name='lstm1')
+        # self.cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name='lstm2')
         #
         # FC
         self.fc1 = tf.keras.layers.Dense(units=128, use_bias=True, activation=tf.nn.relu,
@@ -97,32 +97,27 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         ##################################################################
         # 版本一 该方法效果不理想, 减小了10个百分点
-        # print(x.get_shape().as_list())  # [?, 25, 10, 16]/
-        # treat `feature_w` as max_timestep in lstm.
-        # batch_size = tf.shape(x_rnn)[0]
-        x_rnn = tf.reshape(x_rnn, [-1, 25, 160])
-
-        outputs1 = self.cell1(x_rnn)  # [?, 13, 64]
-        outputs2 = self.cell2(outputs1)  # [?, 64]
+        # x_rnn = tf.reshape(x_rnn, [-1, 25, 160])
+        #
+        # outputs1 = self.cell1(x_rnn)  # [?, 13, 64]
+        # output = self.cell2(outputs1)  # [?, 64]
 
         ####################################################################
         # 版本二
-        # h_conv3_features = tf.unstack(x, axis=-1)  # [[?, 5, 13], ....16]
-        # channel = x.get_shape().as_list()[-1]
-        # rnn_output = []
-        # for channel_index in range(channel):
-        #     name = "gru_" + str(channel_index)
-        #     item_x = tf.transpose(h_conv3_features[channel_index], [0, 2, 1])  # [?, 13, 5] for item in 16
-        #     cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name=name)
-        #     cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
-        #
-        #     item_out = cell1(inputs=item_x)  # [?, 13, rnn_units]
-        #     item_out = cell2(inputs=item_out)  # [?, rnn_units]
-        #     cell1 = None
-        #     cell2 = None
-        #
-        #     rnn_output.append(item_out)
-        # output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16]
+        channel = x_rnn.get_shape().as_list()[-1]
+        h_conv3_features = tf.unstack(x_rnn, axis=-1)  # [[?, 25, 10], ....16]
+        rnn_output = []
+        for channel_index in range(channel):
+            name = "lstm_" + str(channel_index)
+            item_x = tf.transpose(h_conv3_features[channel_index], [0, 2, 1])  # [?, 13, 5] for item in 16
+            cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True, return_state=False, name=name)
+            cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
+
+            item_out = cell1(inputs=item_x)  # [?, 25, rnn_units]
+            item_out = cell2(inputs=item_out)  # [?, rnn_units]
+
+            rnn_output.append(item_out)
+        output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16]
 
         # if training:
         #     fc1 = self.fc1(output)
@@ -153,11 +148,10 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         #     rnn_output.append(fc)
         # rnn_output = tf.squeeze(rnn_output, axis=2)  # [4, ?]
         # logits = tf.transpose(rnn_output)
-        # 版本四 # [?, 5, 13, 8]
-        # x = tf.transpose(x, [0, 2, 1, 3])  # [?, 13, 5, 8]
-        # batch_size = tf.shape(x)[0]
-        # time = tf.shape(x)[1]
-        # x = tf.reshape(x, [batch_size, time, 40])
+        # 版本四 # # [?, 25, 10, 16]
+        # batch_size = tf.shape(x_rnn)[0]
+        # time = tf.shape(x_rnn)[1]
+        # x_rnn = tf.reshape(x_rnn, [batch_size, time, 160])
         # rnn_output = []
         # for index in range(self.num_class):
         #     _name_end = str(index)
@@ -167,20 +161,19 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         #                                   kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
         #                                   bias_initializer=tf.ones_initializer, name='fc' + _name_end)
         #
-        #     item_out = cell1(inputs=x)  # [?, 25, rnn_units]
+        #     item_out = cell1(inputs=x_rnn)  # [?, 25, rnn_units]
         #     item_out = cell2(inputs=item_out)  # [?, rnn_units]
         #     fc = dense(item_out)  # [?, 1]
         #
         #     rnn_output.append(fc)
         # rnn_output = tf.squeeze(rnn_output, axis=2)  # [4, ?]
         # logits = tf.transpose(rnn_output)
-        #
-        # print('logits: ', logits)
+
         # 版本五 3dcnn
         # pool4 = tf.keras.layers.Flatten()(pool4)
         #
         # fc1 = self.fc1(pool4)
         # d1 = tf.keras.layers.Dropout(rate=dropout)(fc1)
-        logits = self.fc2(outputs2)
+        logits = self.fc2(output)
 
         return logits

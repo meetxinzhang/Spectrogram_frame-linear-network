@@ -12,22 +12,19 @@ def get_features_3dmat(fileneme, depth, height, width, training=True):
 
     features3d = stack_features(y, sr=sr, depth=depth, bands=height, frames=width)
 
-    # if len(features3d) == 0:
-    #     raise MyException('depth==0：{}'.format(fileneme))
+    if len(features3d) == 0:
+        raise MyException('depth==0')
 
-    # # 填充
-    # while len(features3d) < depth:
-    #     for i in range(len(features3d)):
-    #         piece_add = features3d[i]
-    #         features3d.append(piece_add)
-    #
-    #         if len(features3d) == 10:
-    #             break
+    # 填充
+    if len(features3d) < depth:
+        for i in range(depth-len(features3d)):
+            piece_add = features3d[i]
+            features3d.append(piece_add)
 
-    len_feat = len(features3d)
-    if len_feat < depth:
-        # 时长： 10.5， len=8
-        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
+    # len_feat = len(features3d)
+    # if len_feat < depth:
+    #     # 时长： 10.5， len=8
+    #     raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
     # if training:
     #     # 数据增强2 - 模拟队列数据结构，左平移每个特征图

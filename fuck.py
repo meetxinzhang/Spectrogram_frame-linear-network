@@ -77,7 +77,7 @@ class input_data(object):
             self.training = False
             print('######################### 测试')
 
-        print('epoch={},point={}'.format(self.epoch_index, self.file_point))
+        # print('epoch={},point={}'.format(self.epoch_index, self.file_point))
 
         end = self.file_point + batch_size
 
