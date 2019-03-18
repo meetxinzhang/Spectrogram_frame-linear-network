@@ -43,7 +43,7 @@ while step * batch_size < 9999:
         d_rate = 0
 
     with tf.GradientTape() as tape:
-        logits = t3lm.call(batch_x, training=t, dropout=d_rate)
+        logits = t3lm.call(batch_x, training=t, drop_rate=d_rate)
         loss = cal_loss(logits, batch_y)
 
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
