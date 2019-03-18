@@ -3,9 +3,10 @@ logs/*
 sounds/*
 sounds_test/*
 tensor_logs/*
-.不好的数据/*
+不好的数据/*
+新建文件夹/*
 *.pyc
 *.txt
 *.mp3
 *.jpg
-tensor_logs/events.out.tfevents.1552206731.DEVIN-ENTERPRIS
+tensor_logs/*
