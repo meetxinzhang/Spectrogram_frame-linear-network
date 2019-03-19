@@ -9,7 +9,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.num_class = num_class
 
         # 3DCNN
-        self.conv3d1 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+        self.conv3d1 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
                                               bias_initializer=tf.zeros_initializer(),
@@ -17,7 +17,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last')
 
-        self.conv3d2 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+        self.conv3d2 = tf.keras.layers.Conv3D(filters=64, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
                                               bias_initializer=tf.zeros_initializer(),
@@ -67,42 +67,42 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         ##################################################################
         x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 16]
-        batch_size = tf.shape(x_rnn)[0]
-        time_step = tf.shape(x_rnn)[1]
-        dim3 = tf.shape(x_rnn)[2] * tf.shape(x_rnn)[3]
-        x_rnn = tf.reshape(x_rnn, [batch_size, time_step, dim3])
+        shape = x_rnn.get_shape().as_list()
+        time_step = shape[1]
+        dim3 = shape[2] * shape[3]
+        x_rnn = tf.reshape(x_rnn, [-1, time_step, dim3])  # [?, 25, 160]
         rnn_output = []
         for i in range(self.num_class):
             name = "ltsm_" + str(i)
             cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
             fc = tf.keras.layers.Dense(units=1, use_bias=True, activation=None,
-                                            kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
-                                            bias_initializer=tf.constant_initializer)
+                                       kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                       bias_initializer=tf.constant_initializer)
 
-            item_out = cell(inputs=x_rnn)  # [?, 25, 32]
-            item_out = fc(item_out)
+            item_out = cell(inputs=x_rnn)  # [?, 256]
+            item_out = fc(item_out)  # [?, 1]
             cell = None
             fc = None
 
-            rnn_output.append(item_out)
-        
-
+            rnn_output.append(item_out)  # [4, ?, 1]
+        rnn_output = tf.squeeze(rnn_output)  # [4, ?]
+        logits = tf.transpose(rnn_output)  # [?, 4]
         ####################################################################
-        rnn_features = tf.unstack(x_rnn, axis=-1)  # [[?, 10, 25], ....16]
-        channel = x_rnn.get_shape().as_list()[-1]
-        rnn_output = []
-        for channel_index in range(channel):
-            name = "gru_" + str(channel_index)
-            item_x = tf.transpose(rnn_features[channel_index], [0, 2, 1])  # [?, 25, 10] for item in 16
-            cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
-            item_out = cell(inputs=item_x)  # [?, 25, 32]
-            cell = None
-
-            rnn_output.append(item_out)
-
-        output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16=32*16]
-
-        d = tf.keras.layers.Dropout(drop_rate)(output)
-        logits = self.fc(d)
+        # rnn_features = tf.unstack(x_rnn, axis=-1)  # [[?, 10, 25], ....16]
+        # channel = x_rnn.get_shape().as_list()[-1]
+        # rnn_output = []
+        # for channel_index in range(channel):
+        #     name = "gru_" + str(channel_index)
+        #     item_x = tf.transpose(rnn_features[channel_index], [0, 2, 1])  # [?, 25, 10] for item in 16
+        #     cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
+        #     item_out = cell(inputs=item_x)  # [?, 25, 32]
+        #     cell = None
+        #
+        #     rnn_output.append(item_out)
+        #
+        # output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16=32*16]
+        #
+        # d = tf.keras.layers.Dropout(drop_rate)(output)
+        # logits = self.fc(d)
 
         return logits

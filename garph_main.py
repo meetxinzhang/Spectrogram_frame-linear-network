@@ -16,7 +16,7 @@ num_class = 4
 
 training_iters = 99999
 batch_size = 32
-epoch = 3
+epoch = 2
 display_step = 1
 drop_rate = 0.2
 

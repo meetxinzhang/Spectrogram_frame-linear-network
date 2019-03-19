@@ -125,8 +125,8 @@ mel(f) = 2595*log10(1+f/700)
 # plt.tight_layout()
 # plt.show()
 
-import tensorflow as tf
-sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+# import tensorflow as tf
+# sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
 
 # with tf.device('/gpu:0'):
@@ -151,3 +151,40 @@ sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 # import pywt
 # cA, cD = pywt.dwt(y, 'db1')
 # print(np.shape(cA), np.shape(cD))
+
+import tensorflow as tf
+import numpy as np
+
+x_rnn = [[[[1, 2],
+           [3, 4]],
+
+          [[1, 2],
+           [3, 4]]],
+
+
+         [[[1, 2],
+           [3, 4]],
+
+          [[1, 2],
+           [3, 4]]],
+
+
+         [[[1, 2],
+           [3, 4]],
+
+          [[1, 2],
+           [3, 4]]]]
+
+sess = tf.Session()
+# [3,2,2,2]
+
+x_rnn = tf.transpose(x_rnn, [0, 1, 3, 2])  # [3, 2, 2, 2]
+# print(sess.run(x_rnn))
+
+# shape = x_rnn.get_shape().as_list()
+# time_step = shape[1]
+# dim3 = shape[2] * shape[3]
+x_rnns = tf.unstack(x_rnn, axis=1)
+x_rnn = tf.concat(x_rnns, -1)
+
+print(sess.run(x_rnn))

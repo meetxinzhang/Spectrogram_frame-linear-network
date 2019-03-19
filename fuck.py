@@ -68,7 +68,6 @@ class input_data(object):
 
             self.epoch_index += 1
             self.file_point = 0
-            # self.filenames, self.labels = self.get_filenames(self.train_file_dir)
 
         if self.epoch_index > epoch:
             self.epoch_index = 1
