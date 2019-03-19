@@ -11,18 +11,18 @@ depth = 10
 height = 80
 wigth = 200
 chennel = 1
-rnn_units = 256
+rnn_units = 200
 num_class = 4
 
 training_iters = 99999
 batch_size = 64
-epoch = 7
+epoch = 5
 display_step = 1
 drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
-    return 0.01 / (epoch_index + 0.001 * (step - 1))
+    return 0.01 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
 
 
 
