@@ -9,25 +9,25 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.num_class = num_class
 
         # 3DCNN
-        self.conv3d1 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-                                              activation=tf.nn.relu, padding='same',
-                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+        self.conv3d1 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.leaky_relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last')
 
-        self.conv3d2 = tf.keras.layers.Conv3D(filters=64, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-                                              activation=tf.nn.relu, padding='same',
-                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+        self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.leaky_relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last')
 
-        self.conv3d3 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-                                              activation=tf.nn.relu, padding='same',
-                                              kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+        self.conv3d3 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.leaky_relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
         self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
@@ -35,7 +35,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         # FC
         self.fc = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
-                                        kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
+                                        kernel_initializer=tf.keras.initializers.he_normal(),
                                         bias_initializer=tf.constant_initializer)
 
     def call(self, inputs, drop_rate=0.2, **kwargs):
@@ -67,24 +67,31 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         ##################################################################
         x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 16]
-        shape = x_rnn.get_shape().as_list()
-        time_step = shape[1]
-        dim3 = shape[2] * shape[3]
-        x_rnn = tf.reshape(x_rnn, [-1, time_step, dim3])  # [?, 25, 160]
+        # shape = x_rnn.get_shape().as_list()
+        # time_step = shape[1]
+        # dim3 = shape[2] * shape[3]
+        # x_rnn = tf.reshape(x_rnn, [-1, time_step, dim3])  # [?, 25, 160]
+        x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
+        x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度
         rnn_output = []
         for i in range(self.num_class):
             name = "ltsm_" + str(i)
-            cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
-            fc = tf.keras.layers.Dense(units=1, use_bias=True, activation=None,
-                                       kernel_initializer=tf.keras.initializers.normal(stddev=0.01),
-                                       bias_initializer=tf.constant_initializer)
+            cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name, return_sequences=True)
+            cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
 
-            item_out = cell(inputs=x_rnn)  # [?, 256]
-            item_out = fc(item_out)  # [?, 1]
+            fc2 = tf.keras.layers.Dense(units=1, use_bias=True, activation=None,
+                                        kernel_initializer=tf.keras.initializers.he_normal(),
+                                        bias_initializer=tf.zeros_initializer())
+            drop = tf.keras.layers.Dropout(rate=drop_rate)
+
+            item_out1 = cell1(inputs=x_rnn)  # [?, 25, 512]
+            item_out2 = cell2(inputs=item_out1)
+            fc_out1 = drop(item_out2)
+            fc_out2 = fc2(fc_out1)  # [?, 4]
             cell = None
             fc = None
 
-            rnn_output.append(item_out)  # [4, ?, 1]
+            rnn_output.append(fc_out2)  # [4, ?, 1]
         rnn_output = tf.squeeze(rnn_output)  # [4, ?]
         logits = tf.transpose(rnn_output)  # [?, 4]
         ####################################################################

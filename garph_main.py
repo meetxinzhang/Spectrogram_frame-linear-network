@@ -15,14 +15,14 @@ rnn_units = 256
 num_class = 4
 
 training_iters = 99999
-batch_size = 32
-epoch = 2
+batch_size = 64
+epoch = 7
 display_step = 1
 drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
-    return 0.01 / (2*epoch_index + 0.002 * (step - 1))
+    return 0.01 / (epoch_index + 0.001 * (step - 1))
 
 
 
