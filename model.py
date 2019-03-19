@@ -76,18 +76,15 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         rnn_output = []
         for i in range(self.num_class):
             name = "ltsm_" + str(i)
-            cell1 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name, return_sequences=True)
-            cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
-
-            fc2 = tf.keras.layers.Dense(units=1, use_bias=True, activation=None,
-                                        kernel_initializer=tf.keras.initializers.he_normal(),
-                                        bias_initializer=tf.zeros_initializer())
+            cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
+            fc = tf.keras.layers.Dense(units=1, use_bias=True, activation=None,
+                                       kernel_initializer=tf.keras.initializers.he_normal(),
+                                       bias_initializer=tf.constant_initializer())
             drop = tf.keras.layers.Dropout(rate=drop_rate)
 
-            item_out1 = cell1(inputs=x_rnn)  # [?, 25, 512]
-            item_out2 = cell2(inputs=item_out1)
-            fc_out1 = drop(item_out2)
-            fc_out2 = fc2(fc_out1)  # [?, 4]
+            item_out = cell(inputs=x_rnn)  # [?, 25, 512]
+            fc_out = drop(item_out)
+            fc_out2 = fc(fc_out)  # [?, 4]
             cell = None
             fc = None
 

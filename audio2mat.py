@@ -2,7 +2,7 @@ import librosa.display
 from MyException import MyException
 import numpy as np
 import random
-# import cv2
+import cv2
 
 
 def get_features_3dmat(fileneme, depth, height, width, training=True):
@@ -60,8 +60,8 @@ def stack_features(y, sr, depth=5, bands=80, frames=200):
             # logspec = logspec.T.flatten()[:, np.newaxis].T
 
             # blur = cv.bilateralFilter（img，9,75,75）
-            # kernel = np.ones((3, 3), np.float32) / 25
-            # features2d = cv2.filter2D(features2d, -1, kernel)
+            kernel = np.ones((3, 3), np.float32) / 25
+            features2d = cv2.filter2D(features2d, -1, kernel)
 
             # # 数据增强1 - 垂直翻转
             # if seed_if == 0:
