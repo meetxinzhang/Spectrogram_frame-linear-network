@@ -7,7 +7,7 @@ import time
 sess = tf.InteractiveSession()
 
 # model
-depth = 10
+depth = 5
 height = 80
 wigth = 200
 chennel = 1
@@ -30,7 +30,7 @@ def my_learning_rate(epoch_index, step):
 activate tf
 tensorboard --logdir=tensor_logs
 """
-logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + '/'
+logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '/'
 path = 'sounds/'
 fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
 

@@ -14,7 +14,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[1, 2, 2], strides=[1, 2, 2], padding='same',
                                                   data_format='channels_last')
 
         self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
