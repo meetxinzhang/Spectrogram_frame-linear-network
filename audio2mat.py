@@ -129,7 +129,7 @@ def get_features_3dmat(fileneme, depth, height, width, training=True):
     len_feat = len(features3d)
     if len_feat < depth:
         # 时长： 10.5， len=8
-        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
+        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)) + fileneme)
 
     return features3d
 
@@ -156,13 +156,15 @@ def pick_feat(mat, depth=5):
                 best_index = start
 
     index_1th = best_index + int(window_size*0.5*(0-2))
+    if index_1th + window_size*3 > np.shape(mat)[1]:
+        index_1th = np.shape(mat)[1] - window_size*3
     if index_1th < 0:
         index_1th = 0
 
     for i in range(depth):
-        if index_1th+window_size > np.shape(mat)[1]:
-            break
         feature = mat[:, index_1th:index_1th+window_size]
+        if np.shape(feature)[1] < window_size:
+            break
         features3d.append(feature)
         index_1th += int(window_size*0.5)
 

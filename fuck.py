@@ -93,7 +93,7 @@ class input_data(object):
             else:
                 imagePath = self.test_fnames[self.file_point]
             try:
-                # [10, 80, 200] 这里可以换成其他任何读取单个样本的数据
+                # list=[5, 80, 200] 这里可以换成其他任何读取单个样本的数据
                 features = audio2mat.get_features_3dmat(
                     imagePath, depth=self.depth, height=self.height, width=self.width, training=self.training)
             except EOFError:
