@@ -129,7 +129,7 @@ def get_features_3dmat(fileneme, depth, height, width, training=True):
     len_feat = len(features3d)
     if len_feat < depth:
         # 时长： 10.5， len=8
-        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)) + fileneme)
+        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
 
     return features3d
 
@@ -169,3 +169,8 @@ def pick_feat(mat, depth=5):
         index_1th += int(window_size*0.5)
 
     return features3d
+
+
+# if __name__ == '__main__':
+#     a = get_features_3dmat('sounds//Oriolus+oriolus/Oriolus oriolus/Oriolus oriolus_430350.mp3', depth=5, height=80, width=200)
+#     scipy.misc.imsave('D:/GitHub/ProjectX/test/in.jpg', a)

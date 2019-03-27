@@ -16,13 +16,13 @@ num_class = 4
 
 training_iters = 99999
 batch_size = 64
-epoch = 5
+epoch = 4
 display_step = 1
 drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
-    return 0.01 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+    return 0.001 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
 
 
 
