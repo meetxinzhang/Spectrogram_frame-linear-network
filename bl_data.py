@@ -23,12 +23,11 @@ class batch_generator(object):
         labels = []
 
         for train_class in os.listdir(train_file_dir):
-            for dir in os.listdir(train_file_dir + '/' + train_class):
-                for pic in os.listdir(train_file_dir + '/' + train_class + '/' + dir):
-                    if os.path.isfile(train_file_dir + '/' + train_class + '/' + dir + '/' + pic):
-                        filenames.append(train_file_dir + '/' + train_class + '/' + dir + '/' + pic)
-                        label = class_names.index(train_class)
-                        labels.append(int(label))
+            for pic in os.listdir(train_file_dir + '/' + train_class + '/'):
+                if os.path.isfile(train_file_dir + '/' + train_class + '/' + pic):
+                    filenames.append(train_file_dir + '/' + train_class + '/' + pic)
+                    label = class_names.index(train_class)
+                    labels.append(int(label))
 
         temp = np.array([filenames, labels])
         # 矩阵转置，将数据按行排列，一行一个样本，image位于第一维，label位于第二维
@@ -89,9 +88,9 @@ class batch_generator(object):
                 imagePath = self.train_fnames[self.file_point]
             else:
                 imagePath = self.test_fnames[self.file_point]
+
             try:
                 features = np.asarray(Image.open(imagePath))
-                print('1111111111', features.shape)
             except EOFError:
                 print('EOFError', imagePath)
                 self.file_point += 1
@@ -99,6 +98,10 @@ class batch_generator(object):
                 continue
             except MyException as e:
                 print(e.args)
+                self.file_point += 1
+                end += 1
+                continue
+            if features.shape[1] < 200:
                 self.file_point += 1
                 end += 1
                 continue
@@ -119,6 +122,4 @@ class batch_generator(object):
 
             self.file_point += 1
 
-        # print(np.shape(np.asarray(x_data, dtype=np.float32)))
-        return np.asarray(x_data, dtype=np.float32), np.asarray(y_data, dtype=np.int32), self.epoch_index
-
+        return x_data, y_data, self.epoch_index
