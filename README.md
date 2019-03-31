@@ -1,3 +1,5 @@
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+
 一个从 www.xeno-canto.org 下载音频数据的网络爬虫
 
 
