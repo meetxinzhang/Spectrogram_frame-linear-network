@@ -91,7 +91,7 @@ class batch_generator(object):
 
             try:
                 features = np.asarray(Image.open(imagePath))
-            except EOFError:
+            except OSError:
                 print('EOFError', imagePath)
                 self.file_point += 1
                 end += 1
