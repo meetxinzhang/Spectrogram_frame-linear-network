@@ -13,12 +13,13 @@ class XNN(tf.keras.Model):
         self.rnn_units = rnn_units
 
         self.conv1 = tf.keras.layers.Conv2D(
-            filters=16, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
+            filters=4, kernel_size=[9, 9], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
             kernel_initializer=tf.keras.initializers.constant(value=1), bias_initializer=tf.zeros_initializer())
         self.pooling1 = tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2], padding='same')
+        self.gap = tf.keras.layers.AveragePooling2D(pool_size=[40, 100], strides=[40, 100], padding='same')
 
         self.conv2 = tf.keras.layers.Conv2D(
-            filters=32, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
+            filters=16, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
             kernel_initializer=tf.keras.initializers.constant(value=1), bias_initializer=tf.zeros_initializer())
         self.pooling2 = tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2], padding='same')
 
@@ -32,23 +33,29 @@ class XNN(tf.keras.Model):
                                         kernel_initializer=tf.keras.initializers.he_normal(),
                                         bias_initializer=tf.constant_initializer())
 
-    def call_cnn(self, input):
+    def call_filter(self, input):
         conv1 = self.conv1(input)
-        conv1 = tf.layers.batch_normalization(conv1, training=True)
-        pool1 = self.pooling1(conv1)  # (?, 40, 100, 16)
+        # conv1 = tf.layers.batch_normalization(conv1, training=True)
+        pool1 = self.pooling1(conv1)  # (?, 40, 100, 4)
+        gap = self.gap(pool1)  # (?, 4)
 
-        conv2 = self.conv2(pool1)
+        return pool1.numpy(), gap.numpy()
+
+    def call_recognizer(self, input):
+        input = tf.cast(input, dtype=tf.float32)
+
+        conv2 = self.conv2(input)
         conv2 = tf.layers.batch_normalization(conv2, training=True)
-        pool2 = self.pooling2(conv2)  # (?, 20, 50, 32)
-
+        pool2 = self.pooling2(conv2)  # (?, 20, 50, 16)
         conv3 = self.conv3(pool2)
         conv3 = tf.layers.batch_normalization(conv3, training=True)
         pool3 = self.pooling3(conv3)  # (?, 10, 25, 8)
 
-        return pool3.numpy()
+        x_rnn = tf.transpose(pool3, [0, 2, 1, 3])  # [?, 25, 10, 8]
+        x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
+        x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度 [?, 25, 80]
 
-    def call_rnn(self, input):
-        rnn_out = self.cell(input)
+        rnn_out = self.cell(x_rnn)
         logits = self.fc(rnn_out)
         return logits
 
@@ -65,11 +72,13 @@ class XNN(tf.keras.Model):
         :return: 模型输出
         """
         batch_features = []
+        batch_filter_gap = []
         window_size = 200
 
         for img in inputs:  # (80, width, 1)
             shape = np.shape(img)
             best_feature = None
+            best_gap = None
             max_score = 0
 
             for (start, end) in self.windows(shape[1], window_size=window_size):
@@ -78,23 +87,23 @@ class XNN(tf.keras.Model):
                 if np.shape(signal)[1] == window_size:
                     signal = np.expand_dims(signal, axis=0)  # 添加batch_size维度 (1, 80, 200, 1)
                     signal = tf.cast(signal, dtype=tf.float32)
-                    cnn_out = self.call_cnn(signal)  # 调用cnn (1, 10, 25, 8)
-                    cnn_out = np.squeeze(cnn_out, axis=0)  # 删除batch_size维度 (10, 25, 8)
+                    cnn_out,  gap = self.call_filter(signal)  # 调用cnn (1, 40, 100, 4), (1,1,1, 4)
+                    cnn_out = np.squeeze(cnn_out, axis=0)  # 删除batch_size维度 (40, 100, 4)
+                    gap = np.squeeze(gap)  # 删除长度是1的维度 (1, 4)
 
-                    he = sum(sum(sum(cnn_out)))
+                    he = sum(gap)
                     if he >= max_score:
                         max_score = he
                         best_feature = cnn_out
+                        best_gap = gap
             pass
             batch_features.append(best_feature)  # (?, 10, 25, 8)
-
-        x_rnn = tf.transpose(batch_features, [0, 2, 1, 3])  # [?, 25, 10, 8]
-        x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
-        x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度 [?, 25, 80]
+            batch_filter_gap.append(best_gap)  # (?, 4)
 
         # 调用rnn
-        logits = self.call_rnn(x_rnn)
-        return logits
+        logits = self.call_recognizer(batch_features)
+
+        return logits, batch_filter_gap
 
 
 # model
@@ -118,10 +127,13 @@ def my_learning_rate(epoch_index, step):
     return 0.05 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
 
 
-def cal_loss(logits, lab_batch):
+def cal_loss(logits, batch_filter_gap, lab_batch):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=lab_batch, logits=logits)
     loss = tf.reduce_mean(cross_entropy)
-    return loss
+
+    cross_entropy_filter = tf.nn.softmax_cross_entropy_with_logits(labels=lab_batch, logits=batch_filter_gap)
+    loss_filter = tf.reduce_mean(cross_entropy_filter)
+    return 0.2*loss_filter + loss
 
 
 step = 1
@@ -136,8 +148,8 @@ while step * batch_size < 99999:
         d_rate = 0
 
     with tf.GradientTape() as tape:
-        logits = xnn.call(batch_x)
-        loss = cal_loss(logits, batch_y)
+        logits, batch_filter_gap = xnn.call(batch_x)
+        loss = cal_loss(logits, batch_filter_gap, batch_y)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=lr)
     grads = tape.gradient(loss, xnn.variables)
