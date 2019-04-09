@@ -1,7 +1,7 @@
 # coding=utf-8
 import tensorflow as tf
 import model
-import fuck
+import input_data
 import time
 
 sess = tf.InteractiveSession()
@@ -16,13 +16,16 @@ num_class = 4
 
 training_iters = 99999
 batch_size = 64
-epoch = 4
+epoch = 4  # 训练的 epoch 数，从1开始计数
 display_step = 1
 drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
-    return 0.001 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+    if epoch_index != 0:
+        return 0.001 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+    else:
+        return 0.000001
 
 
 
@@ -31,8 +34,7 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '/'
-path = 'sounds/'
-fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
+fuckdata = input_data.input_data(file_dir='yield/images', depth=depth, height=height, width=wigth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, depth, height, wigth, chennel])
 y_ph = tf.placeholder("float", [None, num_class])
@@ -74,7 +76,7 @@ step = 1
 while step * batch_size < training_iters:
     batch_x, batch_y, epoch_index = fuckdata.next_batch(batch_size=batch_size, epoch=epoch)
     lr = my_learning_rate(epoch_index, step)
-    if epoch_index < epoch:
+    if epoch_index != 0:
         d_rate = drop_rate
     else:
         d_rate = 0

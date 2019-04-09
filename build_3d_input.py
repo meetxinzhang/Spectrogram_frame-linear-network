@@ -1,6 +1,8 @@
 import librosa.display
 from MyException import MyException
 import numpy as np
+from PIL import Image
+
 import scipy.misc
 import random
 import cv2
@@ -117,19 +119,20 @@ import cv2
 
 
 def get_features_3dmat(fileneme, depth, height, width, training=True):
-    y, sr = librosa.load(fileneme, sr=None)
-
-    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512, power=2.0)
-    logspec = librosa.amplitude_to_db(mel)
-
-    logspec = np.asarray(scipy.misc.toimage(logspec))
+    # y, sr = librosa.load(fileneme, sr=None)
+    #
+    # mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512, power=2.0)
+    # logspec = librosa.amplitude_to_db(mel)
+    #
+    # logspec = np.asarray(scipy.misc.toimage(logspec))
+    logspec = np.asarray(Image.open(fileneme))
 
     features3d = pick_feat(logspec, depth=depth)
 
     len_feat = len(features3d)
     if len_feat < depth:
         # 时长： 10.5， len=8
-        raise MyException('该数据时长不够：{}'.format(librosa.get_duration(filename=fileneme)))
+        raise MyException('该数据时长不够：{}'.format(np.shape(logspec)))
 
     return features3d
 

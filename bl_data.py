@@ -10,7 +10,7 @@ class batch_generator(object):
     def __init__(self, file_dir, num_class=4):
         self.train_file_dir = file_dir
         self.training = True
-        self.epoch_index = 1
+        self.epoch_index = 1  # 第零个epoch表示测试集
         self.file_point = 0
 
         self.num_class = num_class
@@ -66,7 +66,7 @@ class batch_generator(object):
             self.file_point = 0
 
         if self.epoch_index > epoch:
-            self.epoch_index = 1
+            self.epoch_index = 0  # 第零个epoch表示测试集
             self.file_point = 0
             max = len(self.test_fnames)
             self.training = False

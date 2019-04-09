@@ -1,17 +1,17 @@
 import os
 import numpy as np
-from PIL import Image
+import build_3d_input
 from MyException import MyException
 from class_names import class_names
 
 
-class batch_generator(object):
+class input_data(object):
 
-    def __init__(self, file_dir, depth=5, height=80, width=200, num_class=4):
-        self.train_file_dir = file_dir
+    def __init__(self, file_dir, depth=10, height=80, width=200, num_class=4):
+        self.file_dir = file_dir
         self.training = True
-        self.epoch_index = 1
-        self.file_point = 0
+        self.epoch_index = 1  # epoch次数指针，训练从1开始
+        self.file_point = 0  # 第0个epoch表示测试集
 
         self.depth = depth
         self.height = height
@@ -19,19 +19,18 @@ class batch_generator(object):
         self.num_class = num_class
 
         self.train_fnames, self.train_labs, self.test_fnames, self.test_labs\
-            = self.get_filenames(self.train_file_dir)
+            = self.get_filenames(self.file_dir)
 
-    def get_filenames(self, train_file_dir):
+    def get_filenames(self, file_dir):
         filenames = []
         labels = []
 
-        for train_class in os.listdir(train_file_dir):
-            for dir in os.listdir(train_file_dir + '/' + train_class):
-                for pic in os.listdir(train_file_dir + '/' + train_class + '/' + dir):
-                    if os.path.isfile(train_file_dir + '/' + train_class + '/' + dir + '/' + pic):
-                        filenames.append(train_file_dir + '/' + train_class + '/' + dir + '/' + pic)
-                        label = class_names.index(train_class)
-                        labels.append(int(label))
+        for train_class in os.listdir(file_dir):
+            for pic in os.listdir(file_dir + '/' + train_class):
+                if os.path.isfile(file_dir + '/' + train_class + '/' + pic):
+                    filenames.append(file_dir + '/' + train_class + '/' + pic)
+                    label = class_names.index(train_class)
+                    labels.append(int(label))
 
         temp = np.array([filenames, labels])
         # 矩阵转置，将数据按行排列，一行一个样本，image位于第一维，label位于第二维
@@ -70,7 +69,7 @@ class batch_generator(object):
             self.file_point = 0
 
         if self.epoch_index > epoch:
-            self.epoch_index = 1
+            self.epoch_index = 0  # 第0个epoch表示测试集
             self.file_point = 0
             max = len(self.test_fnames)
             self.training = False
@@ -79,6 +78,9 @@ class batch_generator(object):
         # print('epoch={},point={}'.format(self.epoch_index, self.file_point))
 
         end = self.file_point + batch_size
+
+        # if end >= max:
+        #     end = max
 
         x_data = []
         y_data = []  # zero-filled list for 'one hot encoding'
@@ -90,15 +92,16 @@ class batch_generator(object):
             else:
                 imagePath = self.test_fnames[self.file_point]
             try:
-                features = np.asarray(Image.open(imagePath))
-                print('1111111111', features.shape)
+                # list=[5, 80, 200] 这里可以换成其他任何读取单个样本的数据
+                features = build_3d_input.get_features_3dmat(
+                    imagePath, depth=self.depth, height=self.height, width=self.width, training=self.training)
             except EOFError:
                 print('EOFError', imagePath)
                 self.file_point += 1
                 end += 1
                 continue
             except MyException as e:
-                print(e.args)
+                # print(e.args)
                 self.file_point += 1
                 end += 1
                 continue

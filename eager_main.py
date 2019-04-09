@@ -1,7 +1,7 @@
 # coding:utf-8
 import tensorflow as tf
 import model
-import fuck
+import input_data
 tf.enable_eager_execution()
 
 # model
@@ -20,7 +20,7 @@ display_step = 1
 
 logs_path = 'tensor_logs/'
 path = 'sounds/'
-fuckdata = fuck.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
+fuckdata = input_data.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
 
 
 def cal_loss(logits, lab_batch):

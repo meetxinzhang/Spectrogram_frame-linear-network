@@ -89,7 +89,7 @@ class XNN(tf.keras.Model):
                     signal = tf.cast(signal, dtype=tf.float32)
                     cnn_out,  gap = self.call_filter(signal)  # 调用cnn (1, 40, 100, 4), (1,1,1, 4)
                     cnn_out = np.squeeze(cnn_out, axis=0)  # 删除batch_size维度 (40, 100, 4)
-                    gap = np.squeeze(gap)  # 删除长度是1的维度 (1, 4)
+                    gap = np.squeeze(gap)  # 删除长度是1的维度 (4, )
 
                     he = sum(gap)
                     if he >= max_score:
@@ -124,7 +124,10 @@ xnn = XNN(num_class=4, rnn_units=128)
 
 
 def my_learning_rate(epoch_index, step):
-    return 0.05 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+    if epoch_index == 0:
+        return 0.00001
+    else:
+        return 0.05 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
 
 
 def cal_loss(logits, batch_filter_gap, lab_batch):
@@ -140,12 +143,10 @@ step = 1
 while step * batch_size < 99999:
     batch_x, batch_y, epoch_index = dd.next_batch(batch_size=batch_size, epoch=epoch)
     lr = my_learning_rate(epoch_index, step)
-    if epoch_index > epoch:
-        t = True
-        d_rate = 0.3
-    else:
-        t = False
+    if epoch_index == 0:
         d_rate = 0
+    else:
+        d_rate = 0.3
 
     with tf.GradientTape() as tape:
         logits, batch_filter_gap = xnn.call(batch_x)
