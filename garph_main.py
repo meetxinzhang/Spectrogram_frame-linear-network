@@ -15,15 +15,15 @@ rnn_units = 200
 num_class = 4
 
 training_iters = 99999
-batch_size = 64
-epoch = 4  # 训练的 epoch 数，从1开始计数
+batch_size = 32
+epoch = 2  # 训练的 epoch 数，从1开始计数
 display_step = 1
 drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
     if epoch_index != 0:
-        return 0.001 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+        return 0.01 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
     else:
         return 0.000001
 

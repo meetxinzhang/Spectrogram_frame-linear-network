@@ -19,7 +19,7 @@ epoch = 6
 display_step = 1
 
 logs_path = 'tensor_logs/'
-path = 'sounds/'
+path = 'sounds_data/'
 fuckdata = input_data.input_data(train_file_dir=path, depth=depth, height=height, width=wigth, num_class=num_class)
 
 

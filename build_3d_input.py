@@ -175,5 +175,5 @@ def pick_feat(mat, depth=5):
 
 
 # if __name__ == '__main__':
-#     a = get_features_3dmat('sounds//Oriolus+oriolus/Oriolus oriolus/Oriolus oriolus_430350.mp3', depth=5, height=80, width=200)
+#     a = get_features_3dmat('sounds_data//Oriolus+oriolus/Oriolus oriolus/Oriolus oriolus_430350.mp3', depth=5, height=80, width=200)
 #     scipy.misc.imsave('D:/GitHub/ProjectX/test/in.jpg', a)

@@ -73,6 +73,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # x_rnn = tf.reshape(x_rnn, [-1, time_step, dim3])  # [?, 25, 160]
         x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
         x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度
+
         rnn_output = []
         for i in range(self.num_class):
             name = "ltsm_" + str(i)
@@ -86,6 +87,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
             fc_out = drop(item_out)
             fc_out2 = fc(fc_out)  # [?, 4]
             cell = None
+            drop = None
             fc = None
 
             rnn_output.append(fc_out2)  # [4, ?, 1]

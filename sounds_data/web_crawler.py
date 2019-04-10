@@ -5,7 +5,7 @@
 # 可根据重试计数更换代理；
 # 模块化设计，可根据文件计数器加入动态代理；
 #
-# 不同的声音种类放入 sounds/ 下不同的文件夹，文件夹名直接就是标签
+# 不同的声音种类放入 mp3/ 下不同的文件夹，文件夹名直接就是标签
 # 文件列表放入 logs/ 文件夹下
 #
 # by Devin Zhang
@@ -26,7 +26,6 @@ import socket
 
 
 class MyWebCrawler:
-
     socket.setdefaulttimeout(100)
     proxy = {'https': '39.107.84.185:8123'}
     headers = {
@@ -46,9 +45,9 @@ class MyWebCrawler:
                       'Chrome/69.0.3497.81 Safari/537.36'}
 
     def __init__(self):
-        if not os.path.exists("sounds"):
-            print("Creating subdirectory \"sounds\" for downloaded files...")
-            os.makedirs("sounds")
+        if not os.path.exists("mp3"):
+            print("Creating subdirectory \"mp3\" for downloaded files...")
+            os.makedirs("mp3")
 
         # if not os.path.exists("logs/" + search_terms):
         #     print("Creating logs/{}...".format(search_terms))
@@ -125,7 +124,7 @@ class MyWebCrawler:
 
         return file_urls, bird_names, bird_ids
 
-    # creates the subdirectory sounds if necessary, and downloads all sound files
+    # creates the subdirectory mp3 if necessary, and downloads all sound files
     # found with the search terms into that directory. inserts the XC catalogue
     # number in front of the file name, otherwise preserving original file names.
     def crawling_scheduler(self, search_terms):
@@ -155,15 +154,15 @@ class MyWebCrawler:
             # be too long in unicode values. in these cases, just use the ID number
             # as the filename.
             local_filename = bird_names[i] + "_" + ids[i] + ".mp3"
-            if len("sounds/" + local_filename) > 255:
+            if len("mp3/" + local_filename) > 255:
                 local_filename = bird_names[i] + "_" + str(i) + ".mp3"
 
-            if not os.path.exists("sounds/{}/{}".format(search_terms, bird_names[i])):
+            if not os.path.exists("mp3/{}/{}".format(search_terms, bird_names[i])):
                 # 如果没有该分类文件夹，则创建文件夹用于保存该分类下文件
-                print("########## Creating subdirectory /sounds/{}/{} "
+                print("########## Creating subdirectory /mp3/{}/{} "
                       .format(search_terms, bird_names[i]) + "for downloaded files...")
-                os.makedirs("sounds/{}/{}".format(search_terms, bird_names[i]))
-            if os.path.exists("sounds/{}/{}/{}".format(search_terms, bird_names[i], local_filename)):
+                os.makedirs("mp3/{}/{}".format(search_terms, bird_names[i]))
+            if os.path.exists("mp3/{}/{}/{}".format(search_terms, bird_names[i], local_filename)):
                 print('{} checked {}'.format(i, local_filename))
                 # 如果该文件已经存在，则继续下一次循环
                 continue
@@ -171,17 +170,17 @@ class MyWebCrawler:
             # 下载文件, 利用 socket.timeout 加入了重试机制
             print('{} downloading {}'.format(i, local_filename))
             self.downloader_retry('https:' + file_urls[i],
-                                  "sounds/{}/{}/{}".format(search_terms, bird_names[i], local_filename))
+                                  "mp3/{}/{}/{}".format(search_terms, bird_names[i], local_filename))
 
             # try:
-            #     request.urlretrieve('https:' + file_urls[i], "sounds/{}/".format(bird_names[i]) + local_filename,
+            #     request.urlretrieve('https:' + file_urls[i], "mp3/{}/".format(bird_names[i]) + local_filename,
             #                         self._progress)
             # except socket.timeout:
             #     count = 1
             #     while count <= 5:
             #         try:
             #             request.urlretrieve('https:' + file_urls[i],
-            #                                 "sounds/{}/".format(bird_names[i]) + local_filename,
+            #                                 "mp3/{}/".format(bird_names[i]) + local_filename,
             #                                 self._progress)
             #             break
             #         except socket.timeout:
@@ -272,6 +271,7 @@ class MyWebCrawler:
         file.close()
         return list
 
+
 # def main(argv):
 #     if len(sys.argv) < 2:
 #         print("Usage: python xcdl.py searchTerm1 searchTerm2 ... searchTermN")
@@ -287,22 +287,33 @@ class MyWebCrawler:
 #
 #     main(snipe)
 
-    # crawling_scheduler('box:25.791,110.799,30.194,115.677')
+# crawling_scheduler('box:25.791,110.799,30.194,115.677')
 
 
 if __name__ == '__main__':
-    commons = open("common.txt")
+    commons = [
+        # 'Cuculus micropterus',  # 107
+        'Pica pica'  # 450
+        # 'Oriolus oriolus',  # 539
+        # 'Anser anser',  # 337
+        # 'Phasianus colchicus'  # 299
+        # 'Tachybaptus ruficollis'  # 286
+        # 'Ardea cinerea',  # 339
+        # 'Accipiter gentilis',  # 262
+        # 'Buteo buteo',  # 395
+    ]
+
+    # commons = open("common.txt")
     mwc = MyWebCrawler()
 
     for line in commons:
-
-        if line is '\n':
-            continue
+        # if line is '\n':
+        #     continue
 
         line = line.replace(' ', '+')
-        line = line.strip('\n')
-        line = ''.join(list(filter(lambda i: not i.isdigit(), line)))
+        # line = line.strip('\n')
+        # line = ''.join(list(filter(lambda i: not i.isdigit(), line)))
         print('\nfor search {} :'.format(line))
         mwc.crawling_scheduler(line)
 
-    commons.close()
+    # commons.close()
