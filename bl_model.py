@@ -7,28 +7,32 @@ tf.enable_eager_execution()
 
 class XNN(tf.keras.Model):
 
-    def __init__(self, num_class, rnn_units):
+    def __init__(self, num_class, rnn_units, drop_rate):
         super(XNN, self).__init__()
         self.num_class = num_class
         self.rnn_units = rnn_units
 
         self.conv1 = tf.keras.layers.Conv2D(
-            filters=4, kernel_size=[9, 9], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
+            filters=8, kernel_size=[9, 9], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
             kernel_initializer=tf.keras.initializers.constant(value=1), bias_initializer=tf.zeros_initializer())
+        # self.batch_normal1 = tf.keras.layers.BatchNormalization()
         self.pooling1 = tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2], padding='same')
-        self.gap = tf.keras.layers.AveragePooling2D(pool_size=[40, 100], strides=[40, 100], padding='same')
 
         self.conv2 = tf.keras.layers.Conv2D(
-            filters=16, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
+            filters=4, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
             kernel_initializer=tf.keras.initializers.constant(value=1), bias_initializer=tf.zeros_initializer())
+        # self.batch_normal2 = tf.keras.layers.BatchNormalization()
         self.pooling2 = tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2], padding='same')
 
-        self.conv3 = tf.keras.layers.Conv2D(
-            filters=8, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
-            kernel_initializer=tf.keras.initializers.constant(value=1), bias_initializer=tf.zeros_initializer())
-        self.pooling3 = tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2], padding='same')
+        self.gap = tf.keras.layers.AveragePooling2D(pool_size=[20, 50], strides=[20, 50], padding='same')
+
+        # self.conv3 = tf.keras.layers.Conv2D(
+        #     filters=8, kernel_size=[3, 3], strides=[1, 1], use_bias=True, activation=tf.nn.relu, padding='same',
+        #     kernel_initializer=tf.keras.initializers.constant(value=1), bias_initializer=tf.zeros_initializer())
+        # self.pooling3 = tf.keras.layers.MaxPooling2D(pool_size=[2, 2], strides=[2, 2], padding='same')
 
         self.cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units)
+        self.drop = tf.keras.layers.Dropout(rate=drop_rate)
         self.fc = tf.keras.layers.Dense(units=self.num_class, use_bias=True, activation=None,
                                         kernel_initializer=tf.keras.initializers.he_normal(),
                                         bias_initializer=tf.constant_initializer())
@@ -36,26 +40,30 @@ class XNN(tf.keras.Model):
     def call_filter(self, input):
         conv1 = self.conv1(input)
         # conv1 = tf.layers.batch_normalization(conv1, training=True)
-        pool1 = self.pooling1(conv1)  # (?, 40, 100, 4)
-        gap = self.gap(pool1)  # (?, 4)
+        pool1 = self.pooling1(conv1)  # (?, 40, 100, 8)
 
-        return pool1.numpy(), gap.numpy()
+        conv2 = self.conv2(pool1)
+        # conv2 = tf.layers.batch_normalization(conv2, training=True)
+        pool2 = self.pooling2(conv2)  # (?, 20, 50, 4)
 
-    def call_recognizer(self, input):
+        # conv3 = self.conv3(pool2)
+        # conv3 = tf.layers.batch_normalization(conv3, training=True)
+        # pool3 = self.pooling3(conv3)  # (?, 10, 25, 8)
+
+        gap = self.gap(pool2)  # (?, 4)
+
+        return pool2.numpy(), gap.numpy()
+
+    def call_recognizer(self, input, isTraining):
         input = tf.cast(input, dtype=tf.float32)
 
-        conv2 = self.conv2(input)
-        conv2 = tf.layers.batch_normalization(conv2, training=True)
-        pool2 = self.pooling2(conv2)  # (?, 20, 50, 16)
-        conv3 = self.conv3(pool2)
-        conv3 = tf.layers.batch_normalization(conv3, training=True)
-        pool3 = self.pooling3(conv3)  # (?, 10, 25, 8)
-
-        x_rnn = tf.transpose(pool3, [0, 2, 1, 3])  # [?, 25, 10, 8]
+        x_rnn = tf.transpose(input, [0, 2, 1, 3])  # [?, 50, 20, 4]
         x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
-        x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度 [?, 25, 80]
+        x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度 [?, 50, 80]
 
         rnn_out = self.cell(x_rnn)
+        if isTraining:
+            rnn_out = self.drop(rnn_out)
         logits = self.fc(rnn_out)
         return logits
 
@@ -65,7 +73,7 @@ class XNN(tf.keras.Model):
             yield start, start + window_size
             start += int(window_size)
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, isTraining=True, **kwargs):
         """
         :param inputs: list类型，(?, 80, width, 1), 每个元素具有不一样的width
         :param kwargs:
@@ -101,7 +109,7 @@ class XNN(tf.keras.Model):
             batch_filter_gap.append(best_gap)  # (?, 4)
 
         # 调用rnn
-        logits = self.call_recognizer(batch_features)
+        logits = self.call_recognizer(batch_features, isTraining)
 
         return logits, batch_filter_gap
 
@@ -112,22 +120,24 @@ height = 80
 wigth = 200
 chennel = 1
 
-rnn_units = 128
+rnn_units = 100
+drop = 0.3
 num_class = 4
 
-batch_size = 32
-epoch = 6
+batch_size = 16
+epoch = 20
 display_step = 1
 
-dd = bl_data.batch_generator(file_dir='yield/images', num_class=num_class)
-xnn = XNN(num_class=4, rnn_units=128)
+dd = bl_data.batch_generator(file_dir='sounds_data/images', num_class=num_class)
+xnn = XNN(num_class=num_class, rnn_units=rnn_units, drop_rate=drop)
 
 
 def my_learning_rate(epoch_index, step):
     if epoch_index == 0:
         return 0.00001
     else:
-        return 0.05 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+        return 0.05 * (0.7**(epoch_index-1)) / (1 + step * 0.01)
+        # return 0.001
 
 
 def cal_loss(logits, batch_filter_gap, lab_batch):
@@ -136,7 +146,7 @@ def cal_loss(logits, batch_filter_gap, lab_batch):
 
     cross_entropy_filter = tf.nn.softmax_cross_entropy_with_logits(labels=lab_batch, logits=batch_filter_gap)
     loss_filter = tf.reduce_mean(cross_entropy_filter)
-    return 0.2*loss_filter + loss
+    return 0.5*loss_filter + loss
 
 
 step = 1
@@ -144,12 +154,12 @@ while step * batch_size < 99999:
     batch_x, batch_y, epoch_index = dd.next_batch(batch_size=batch_size, epoch=epoch)
     lr = my_learning_rate(epoch_index, step)
     if epoch_index == 0:
-        d_rate = 0
+        isTraining = False
     else:
-        d_rate = 0.3
+        isTraining = True
 
     with tf.GradientTape() as tape:
-        logits, batch_filter_gap = xnn.call(batch_x)
+        logits, batch_filter_gap = xnn.call(batch_x, isTraining)
         loss = cal_loss(logits, batch_filter_gap, batch_y)
 
     optimizer = tf.train.AdamOptimizer(learning_rate=lr)

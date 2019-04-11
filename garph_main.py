@@ -16,7 +16,7 @@ num_class = 4
 
 training_iters = 99999
 batch_size = 32
-epoch = 2  # 训练的 epoch 数，从1开始计数
+epoch = 20  # 训练的 epoch 数，从1开始计数
 display_step = 1
 drop_rate = 0.2
 
@@ -34,7 +34,7 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '/'
-fuckdata = input_data.input_data(file_dir='yield/images', depth=depth, height=height, width=wigth, num_class=num_class)
+fuckdata = input_data.input_data(file_dir='sounds_data/images', depth=depth, height=height, width=wigth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, depth, height, wigth, chennel])
 y_ph = tf.placeholder("float", [None, num_class])
