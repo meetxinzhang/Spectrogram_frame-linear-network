@@ -293,7 +293,7 @@ class MyWebCrawler:
 if __name__ == '__main__':
     commons = [
         # 'Cuculus micropterus',  # 107
-        'Pica pica'  # 450
+        # 'Pica pica'  # 450
         # 'Oriolus oriolus',  # 539
         # 'Anser anser',  # 337
         # 'Phasianus colchicus'  # 299

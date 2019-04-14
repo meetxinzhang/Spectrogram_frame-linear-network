@@ -1,7 +1,7 @@
 from PIL import Image
+import psutil
 import numpy as np
 import os
-import scipy.misc
 
 
 def get_list():
@@ -15,29 +15,17 @@ def get_list():
                 filename = image_path + '/' + train_class + '/' + pic
 
                 file_names.append(filename)
+    file_names.reverse()
     return file_names
 
-    # if os.path.exists(save_path):
-    #     print('pass')
-    #     continue
-    # else:
-    #     img = np.asarray(Image.open(image_path))
-    #
-    #
-    #     try:
-    #         scipy.misc.imsave(save_path, logspec[:, 0:65500])
-    #         print('save: ', save_path)
-    #     except OSError as e:
-    #         print(logspec.shape)
-    #         print(e.args)
 
-
-def wait_keyb_in(condition, out_str=''):
-    str = input(out_str)
-    if str == condition:
-        return True
-    else:
-        return False
+def close_display_window(process_list):
+    # for proc in psutil.process_iter():
+    #     if proc not in process_list:
+    #         proc.kill()
+    for proc in psutil.process_iter():  # 遍历当前process
+        if proc.name() == "Microsoft.Photos.exe":  # 如果process的name是display
+            proc.kill()  # 关闭该pro
 
 
 def windows(length, window_size):
@@ -49,63 +37,77 @@ def windows(length, window_size):
         i += 1
 
 
-def pick_feat(mat, depth=5):
-    window_size = 200
-    max = 0
-    best_index = 0
-    features3d = []
-
-    for (start, end) in windows(np.shape(mat)[1], window_size):
-        if np.shape(mat[:, start:end])[1] == window_size:
-            signal = mat[10:-1, start:end]
-            he = sum(sum(signal))
-            if max <= he:
-                max = he
-                best_index = start
-
-    index_1th = best_index + int(window_size*0.5*(0-2))
-    if index_1th + window_size*3 > np.shape(mat)[1]:
-        index_1th = np.shape(mat)[1] - window_size*3
-    if index_1th < 0:
-        index_1th = 0
-
-    for i in range(depth):
-        feature = mat[:, index_1th:index_1th+window_size]
-        if np.shape(feature)[1] < window_size:
-            break
-        features3d.append(feature)
-        index_1th += int(window_size*0.5)
-
-    return features3d
-
-
 def fuck_data(window_size=600):
     file_names = get_list()
     n = len(file_names)
     print('num of file:', n)
 
-    if not wait_keyb_in('f', "使用AD操作方向，F下一张图片，S保存剪切。\n 现在，按F开始(小写)"):
+    if 'd' != input("按键说明：(小写)\n 使用W移动窗口，A上一张图片，D下一张图片，S保存剪切。\n 现在，输入D并回车开始处理下一张图片:"):
         exit(0)
 
     point = 0
-    image_path = file_names[point]
-    img = np.asarray(Image.open(image_path))
+    while point < n:
 
-    for (start, end, i) in windows(np.shape(img)[1], window_size):
-        if np.shape(img[:, start:end])[1] < window_size:
-            break
-        else:
-            signal = img
-            signal[:, start] = 0  # 白色的竖线
-            signal[:, end] = 0  # 白色的竖线
+        image_path = file_names[point]
+        save_dir = image_path.replace('images', 'new_images').replace('.jpg', '')
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
 
-            save_path = image_path.replace('images', 'new_images').replace('.jpg', '('+str(i)+')'+'.jpg')
-            Image.fromarray(signal).show()
+        # 读取图像
+        old_img = np.asarray(Image.open(image_path))
+        img = old_img.copy()
+        img.setflags(write=True)
 
-            if wait_keyb_in('s', '输入操作'):
-                Image.fromarray(img[:, start:end]).save(save_path)
+        for (start, end, i) in windows(np.shape(img)[1], window_size):
+            if np.shape(img[:, start:end])[1] < window_size:
+                break
             else:
-                
+                save_path = save_dir + '/' + str(i) + '.jpg'
+                if os.path.exists(save_path):
+                    print('exist: ', save_path)
+                    continue
+                else:
+                    img[:, start:start+5] = 255  # 白色的竖线
+                    img[:, end:end+5] = 255  # 白色的竖线
+                    # 显示标记的图像
+                    signal_show = Image.fromarray(img)
+
+                    process_list = []
+                    for proc in psutil.process_iter():
+                        process_list.append(proc)
+                    signal_show.show()
+                    # for proc in psutil.process_iter():
+                    #     if proc not in process_list:
+                    #         print(proc.name())
+
+                    ch = input('pic: ' + image_path + ', 输入操作:')
+                    if ch == 's':  # 保存剪切
+                        Image.fromarray(old_img[:, start:end]).save(save_path)
+                        img[:, start:start+5] = 80  # 浅白色的竖线
+                        img[:, end:end+5] = 80  # 浅白色的竖线
+                        signal_show.close()
+                        close_display_window(process_list)
+                    elif ch == 'w':  # 移动窗口
+                        img[:, start:start+5] = 80  # 浅白色的竖线
+                        img[:, end:end+5] = 80  # 浅白色的竖线
+                        close_display_window(process_list)
+                        signal_show.close()
+                        continue
+                    elif ch == 'a':  # 上一张图片
+                        point -= 2
+                        close_display_window(process_list)
+                        signal_show.close()
+                        break
+                    elif ch == 'd':  # 下一张图片
+                        close_display_window(process_list)
+                        signal_show.close()
+                        break
+
+        point += 1
+
+
+if __name__ == '__main__':
+    fuck_data(600)
 
 
 

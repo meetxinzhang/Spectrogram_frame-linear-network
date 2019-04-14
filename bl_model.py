@@ -122,13 +122,13 @@ chennel = 1
 
 rnn_units = 100
 drop = 0.3
-num_class = 4
+num_class = 3
 
 batch_size = 16
-epoch = 20
+epoch = 3
 display_step = 1
 
-dd = bl_data.batch_generator(file_dir='sounds_data/images', num_class=num_class)
+dd = bl_data.batch_generator(file_dir='sounds_data/new_images', num_class=num_class)
 xnn = XNN(num_class=num_class, rnn_units=rnn_units, drop_rate=drop)
 
 

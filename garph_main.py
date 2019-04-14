@@ -12,18 +12,18 @@ height = 80
 wigth = 200
 chennel = 1
 rnn_units = 200
-num_class = 4
+num_class = 3
 
 training_iters = 99999
 batch_size = 32
-epoch = 20  # 训练的 epoch 数，从1开始计数
+epoch = 3  # 训练的 epoch 数，从1开始计数
 display_step = 1
 drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
     if epoch_index != 0:
-        return 0.01 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+        return 0.005 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
     else:
         return 0.000001
 
@@ -34,7 +34,7 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '/'
-fuckdata = input_data.input_data(file_dir='sounds_data/images', depth=depth, height=height, width=wigth, num_class=num_class)
+fuckdata = input_data.input_data(file_dir='sounds_data/new_images', depth=depth, height=height, width=wigth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, depth, height, wigth, chennel])
 y_ph = tf.placeholder("float", [None, num_class])

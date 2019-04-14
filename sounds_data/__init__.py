@@ -12,6 +12,8 @@ def file2img(file_dir):
                 save_path = 'images/' + train_class + '/' + pic.replace('.mp3', '') + '.jpg'
                 filename = file_dir + '/' + train_class + '/' + pic
 
+                if not os.path.exists('images/' + train_class):
+                    os.makedirs('images/' + train_class)
                 if os.path.exists(save_path):
                     print('pass')
                     continue
@@ -29,6 +31,6 @@ def file2img(file_dir):
                         print(e.args)
 
 
-imagePath = 'mp3'
+imagePath = 'mp3/Pica+pica'
 file2img(imagePath)
 pass

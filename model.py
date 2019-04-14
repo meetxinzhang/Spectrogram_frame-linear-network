@@ -50,20 +50,20 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         conv1 = self.conv3d1(inputs)
         conv1 = tf.layers.batch_normalization(conv1, training=is_training)
         pool1 = self.pooling1(conv1)  # (?, 5, 40, 100, 16)
-        print('pool1: ', pool1.get_shape().as_list())
+        # print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
         conv2 = tf.layers.batch_normalization(conv2, training=is_training)
         pool2 = self.pooling2(conv2)  # (?, 3, 20, 50, 32)
-        print('pool2: ', pool2.get_shape().as_list())
+        # print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)
         conv3 = tf.layers.batch_normalization(conv3, training=is_training)
         pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 16)
-        print('pool3: ', pool3.get_shape().as_list())
+        # print('pool3: ', pool3.get_shape().as_list())
 
         x_rnn = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 16)
-        print('lstm :\n', x_rnn.get_shape().as_list())  # [?, 10, 25, 16]
+        # print('lstm :\n', x_rnn.get_shape().as_list())  # [?, 10, 25, 16]
 
         ##################################################################
         x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 16]
