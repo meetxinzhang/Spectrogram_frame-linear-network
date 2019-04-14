@@ -14,8 +14,8 @@ chennel = 1
 rnn_units = 200
 num_class = 3
 
-training_iters = 99999
-batch_size = 32
+num_train_samples = 8472
+batch_size = 64
 epoch = 3  # 训练的 epoch 数，从1开始计数
 display_step = 1
 drop_rate = 0.2
@@ -33,7 +33,7 @@ def my_learning_rate(epoch_index, step):
 activate tf
 tensorboard --logdir=tensor_logs
 """
-logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '/'
+logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 fuckdata = input_data.input_data(file_dir='sounds_data/new_images', depth=depth, height=height, width=wigth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, depth, height, wigth, chennel])
@@ -70,25 +70,31 @@ merged_summary_op = tf.summary.merge_all()
 sess.run(init)
 
 # 定义Tensorboard的事件文件路径
-summary_writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
+summary_train_writer = tf.summary.FileWriter(logs_path + '/train', graph=tf.get_default_graph())
+summary_test_writer = tf.summary.FileWriter(logs_path+'/test')
 
 step = 1
-while step * batch_size < training_iters:
+first = True
+while True:
     batch_x, batch_y, epoch_index = fuckdata.next_batch(batch_size=batch_size, epoch=epoch)
     lr = my_learning_rate(epoch_index, step)
+
     if epoch_index != 0:
         d_rate = drop_rate
+        _, summary = sess.run([optimizer, merged_summary_op],
+                              feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate, learning_rate_ph: lr})
+        summary_train_writer.add_summary(summary, step)  # 在每次迭代中将数据写入事件文件
     else:
+        if first:
+            step = 0; first = False
         d_rate = 0
+        _, summary = sess.run([optimizer, merged_summary_op],
+                              feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate, learning_rate_ph: lr})
+        summary_test_writer.add_summary(summary, step)  # 在每次迭代中将数据写入事件文件
 
-    _, summary = sess.run([optimizer, merged_summary_op],
-                          feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate, learning_rate_ph: lr})
-    # 在每次迭代中将数据写入事件文件
-    summary_writer.add_summary(summary, step)
     if step % display_step == 0:
         acc = sess.run(accuracy, feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate})
         loss = sess.run(cost, feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate})
         # lr = sess.run(learing_rate)
-        print('epoch={},item={}, [loss={:.3f},acc={:.3f}], lr={:.6f}'.format(epoch_index, step*batch_size, loss, acc, lr))
+        print('epoch={},item={},[loss={:.3f},acc={:.3f}],lr={:.6f}'.format(epoch_index, step*batch_size, loss, acc, lr))
     step += 1
-print("Optimization Finished!")
