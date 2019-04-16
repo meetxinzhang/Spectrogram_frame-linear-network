@@ -1,24 +1,27 @@
 # coding=utf-8
 import tensorflow as tf
 import model
-import input_data
 import time
+import math
+import input_data
 
 sess = tf.InteractiveSession()
 
 # model
-depth = 5
+move_stride = int(200-(200*0.6))
+depth = math.ceil((600-200)/move_stride)+1
+print(depth, move_stride)
 height = 80
 wigth = 200
 chennel = 1
 rnn_units = 200
+drop_rate = 0.3
 num_class = 3
 
 num_train_samples = 8472
 batch_size = 64
 epoch = 3  # 训练的 epoch 数，从1开始计数
 display_step = 1
-drop_rate = 0.2
 
 
 def my_learning_rate(epoch_index, step):
@@ -34,7 +37,8 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-fuckdata = input_data.input_data(file_dir='sounds_data/new_images', depth=depth, height=height, width=wigth, num_class=num_class)
+fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
+                                 move_stride=move_stride, depth=depth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, depth, height, wigth, chennel])
 y_ph = tf.placeholder("float", [None, num_class])
@@ -71,7 +75,7 @@ sess.run(init)
 
 # 定义Tensorboard的事件文件路径
 summary_train_writer = tf.summary.FileWriter(logs_path + '/train', graph=tf.get_default_graph())
-summary_test_writer = tf.summary.FileWriter(logs_path+'/drawing_place')
+summary_test_writer = tf.summary.FileWriter(logs_path + '/test')
 
 step = 1
 first = True

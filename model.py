@@ -14,7 +14,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[1, 2, 2], strides=[1, 2, 2], padding='same',
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last')
 
         self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
@@ -30,7 +30,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
-        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
+        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last')
 
         # FC
@@ -42,19 +42,19 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         """
         :param **kwargs:
         :param **kwargs:
-        :param input: [?, 10, 80, 200, 1]
+        :param input: [?, 6, 80, 200, 1]
         :return:
         """
-        is_training = tf.equal(drop_rate, 0.2)
+        is_training = tf.equal(drop_rate, 0.3)
 
         conv1 = self.conv3d1(inputs)
         conv1 = tf.layers.batch_normalization(conv1, training=is_training)
-        pool1 = self.pooling1(conv1)  # (?, 5, 40, 100, 16)
+        pool1 = self.pooling1(conv1)  # (?, 4, 40, 100, 16)
         # print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
         conv2 = tf.layers.batch_normalization(conv2, training=is_training)
-        pool2 = self.pooling2(conv2)  # (?, 3, 20, 50, 32)
+        pool2 = self.pooling2(conv2)  # (?, 2, 20, 50, 32)
         # print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)

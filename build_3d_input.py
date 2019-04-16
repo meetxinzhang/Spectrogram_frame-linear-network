@@ -118,7 +118,7 @@ import cv2
 #     return logspec
 
 
-def get_features_3dmat(fileneme, depth, height, width, training=True):
+def get_features_3dmat(fileneme, move_stride, depth):
     # y, sr = librosa.load(fileneme, sr=None)
     #
     # mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512, power=2.0)
@@ -127,7 +127,7 @@ def get_features_3dmat(fileneme, depth, height, width, training=True):
     # logspec = np.asarray(scipy.misc.toimage(logspec))
     logspec = np.asarray(Image.open(fileneme))
 
-    features3d = pick_feat(logspec, depth=depth)
+    features3d = stack_features(logspec, move_stride=move_stride, depth=depth)
 
     len_feat = len(features3d)
     if len_feat < depth:
@@ -137,43 +137,63 @@ def get_features_3dmat(fileneme, depth, height, width, training=True):
     return features3d
 
 
-def windows(length, window_size):
+def windows(row, window_size, move_stride):
     start = 0
-    while start < length:
+    while start + window_size <= row:
         yield start, start + window_size
-        start += int(window_size*0.5)
+        start += move_stride
 
 
-def pick_feat(mat, depth=5):
+def stack_features(mat, move_stride=100, depth=7):
     window_size = 200
-    max = 0
-    best_index = 0
     features3d = []
 
-    for (start, end) in windows(np.shape(mat)[1], window_size):
-        if np.shape(mat[:, start:end])[1] == window_size:
-            signal = mat[10:-1, start:end]
-            he = sum(sum(signal))
-            if max <= he:
-                max = he
-                best_index = start
+    row = np.shape(mat)[1]
+    for (start, end) in windows(row, window_size, move_stride):
+        fragment = mat[:, start:end]  # 不包括第end列哦
+        features3d.append(fragment)
 
-    index_1th = best_index + int(window_size*0.5*(0-2))
-    if index_1th + window_size*3 > np.shape(mat)[1]:
-        index_1th = np.shape(mat)[1] - window_size*3
-    if index_1th < 0:
-        index_1th = 0
+    if len(features3d)*window_size < row:
+        end = row
+        start = end - window_size
+        fragment_last = mat[:, start:end]
+        features3d.append(fragment_last)
 
-    for i in range(depth):
-        feature = mat[:, index_1th:index_1th+window_size]
-        if np.shape(feature)[1] < window_size:
-            break
-        features3d.append(feature)
-        index_1th += int(window_size*0.5)
+    assert len(features3d) == depth
 
     return features3d
 
 
-# if __name__ == '__main__':
-#     a = get_features_3dmat('sounds_data//Oriolus+oriolus/Oriolus oriolus/Oriolus oriolus_430350.mp3', depth=5, height=80, width=200)
-#     scipy.misc.imsave('D:/GitHub/ProjectX/drawing_place/in.jpg', a)
+# def stack_features(mat, depth=5):
+#     window_size = 200
+#     overlap = 40
+#     max = 0
+#     best_index = 0
+#     features3d = []
+#
+#     row = np.shape(mat)[1]
+#     for (start, end) in windows(row, window_size, overlap):
+#         if np.shape(mat[:, start:end])[1] < window_size:
+#             end = row - 1
+#             start = end - window_size
+#
+#         signal = mat[10:-1, start:end]
+#         he = sum(sum(signal))
+#         if max <= he:
+#             max = he
+#             best_index = start
+#
+#     index_1th = best_index - window_size
+#     if index_1th + window_size*3 > row:
+#         index_1th = row - window_size*3
+#     if index_1th < 0:
+#         index_1th = 0
+#
+#     for i in range(depth):
+#         feature = mat[:, index_1th:index_1th+window_size]
+#         if np.shape(feature)[1] < window_size:
+#             break
+#         features3d.append(feature)
+#         index_1th += overlap
+#
+#     return features3d
