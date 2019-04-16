@@ -1,6 +1,7 @@
 .idea/*
 logs/*
 tensor_logs/*
+test/*
 不好的数据/*
 *.pyc
 *.txt

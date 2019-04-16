@@ -47,7 +47,7 @@ import cv2
 #
 #
 # def stack_features(y, sr, depth=5, bands=80, frames=200):
-#     window_size = 512 * (frames - 1)
+#     window_size = 512 * (frames - 1)  # 因为两边会使用填充，所以窗口数目比帧长多1
 #     features3d = []
 #     seed_if = random.randint(0, 1)
 #     for (start, end) in windows(y, window_size):
@@ -176,4 +176,4 @@ def pick_feat(mat, depth=5):
 
 # if __name__ == '__main__':
 #     a = get_features_3dmat('sounds_data//Oriolus+oriolus/Oriolus oriolus/Oriolus oriolus_430350.mp3', depth=5, height=80, width=200)
-#     scipy.misc.imsave('D:/GitHub/ProjectX/test/in.jpg', a)
+#     scipy.misc.imsave('D:/GitHub/ProjectX/drawing_place/in.jpg', a)

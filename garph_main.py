@@ -71,7 +71,7 @@ sess.run(init)
 
 # 定义Tensorboard的事件文件路径
 summary_train_writer = tf.summary.FileWriter(logs_path + '/train', graph=tf.get_default_graph())
-summary_test_writer = tf.summary.FileWriter(logs_path+'/test')
+summary_test_writer = tf.summary.FileWriter(logs_path+'/drawing_place')
 
 step = 1
 first = True
