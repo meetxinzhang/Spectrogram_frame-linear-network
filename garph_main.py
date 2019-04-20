@@ -8,15 +8,15 @@ import input_data
 sess = tf.InteractiveSession()
 
 # model
-move_stride = int(200-(200*0.6))
+move_stride = int(200-(200*0.8))
 depth = math.ceil((600-200)/move_stride)+1
 print(depth, move_stride)
 height = 80
 wigth = 200
 chennel = 1
-rnn_units = 200
+rnn_units = 64
 drop_rate = 0.3
-num_class = 3
+num_class = 4
 
 num_train_samples = 8472
 batch_size = 64

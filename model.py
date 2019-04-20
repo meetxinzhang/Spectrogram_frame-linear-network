@@ -25,12 +25,20 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_last')
 
-        self.conv3d3 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+        self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.leaky_relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
         self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+                                                  data_format='channels_last')
+
+        self.conv3d4 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+                                              activation=tf.nn.leaky_relu, padding='same',
+                                              kernel_initializer=tf.keras.initializers.he_normal(),
+                                              bias_initializer=tf.zeros_initializer(),
+                                              data_format='channels_last')
+        self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
                                                   data_format='channels_last')
 
         # FC
@@ -42,7 +50,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         """
         :param **kwargs:
         :param **kwargs:
-        :param input: [?, 6, 80, 200, 1]
+        :param input: [?, 21, 80, 200, 1]
         :return:
         """
         is_training = tf.equal(drop_rate, 0.3)
@@ -62,15 +70,19 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 16)
         # print('pool3: ', pool3.get_shape().as_list())
 
-        x_rnn = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 16)
-        # print('lstm :\n', x_rnn.get_shape().as_list())  # [?, 10, 25, 16]
+        conv4 = self.conv3d4(pool3)
+        conv4 = tf.layers.batch_normalization(conv4, training=is_training)
+        pool4 = self.pooling4(conv4)  # (?, 1, 5, 13, 4)
+
+        x_rnn = tf.squeeze(pool4, axis=1)  # (?, 10, 25, 16)
+        # print('lstm :\n', x_rnn.get_shape().as_list())  # [?, 5, 13, 4]
 
         ##################################################################
-        x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 16]
+        x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 13, 5, 4]
         # shape = x_rnn.get_shape().as_list()
         # time_step = shape[1]
         # dim3 = shape[2] * shape[3]
-        # x_rnn = tf.reshape(x_rnn, [-1, time_step, dim3])  # [?, 25, 160]
+        # x_rnn = tf.reshape(x_rnn, [-1, time_step, dim3])  # [?, 13, 20]
         x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
         x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度
 
