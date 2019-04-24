@@ -121,7 +121,7 @@ pass
 # lr = 0.005
 # AdamOptimizer
 pass
-# id=3
+# id=2019-04-24-15-20-54
 # 3d cnn + lstm + fc
 # over=0.8 acc = 0.92
 # momentum=0.8
@@ -129,4 +129,14 @@ pass
 # epoch = 3
 # lr = 0.005 * (0.7**(epoch_index-1)) / (1 + step * 0.005)
 # RMSPropOptimizer
+pass
+# id=2019-04-24-16-02-05
+# 3d cnn + lstm分通道 + fc
+# acc = 0.85
+# 其他同上
+pass
+# id=2019-04-24-16-08-04
+# 3d cnn + 一个lstm + fc
+# acc = 0.88
+# 其他同上
 pass

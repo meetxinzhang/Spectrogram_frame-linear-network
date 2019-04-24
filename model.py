@@ -46,9 +46,9 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # self.fc1 = tf.keras.layers.Dense(units=128, use_bias=True, activation=None,
         #                                  kernel_initializer=tf.keras.initializers.he_normal(),
         #                                  bias_initializer=tf.constant_initializer)
-        # self.fc2 = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
-        #                                  kernel_initializer=tf.keras.initializers.he_normal(),
-        #                                  bias_initializer=tf.constant_initializer)
+        self.fc2 = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
+                                         kernel_initializer=tf.keras.initializers.he_normal(),
+                                         bias_initializer=tf.constant_initializer)
 
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
@@ -79,10 +79,9 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # pool4 = self.pooling4(conv4)  # (?, 1, 5, 13, 4)
 
         x_rnn = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 4)
-
         ##################################################################
         x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 4]
-        x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度
+        x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度  [?, 25, 10] * 4
         x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度  [?, 25, 40]
 
         rnn_output = []
@@ -105,27 +104,30 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         rnn_output = tf.squeeze(rnn_output)  # [4, ?]
         logits = tf.transpose(rnn_output)  # [?, 4]
         ####################################################################
-        # rnn_features = tf.unstack(x_rnn, axis=-1)  # [[?, 10, 25], ....16]
-        # channel = x_rnn.get_shape().as_list()[-1]
         # rnn_output = []
-        # for channel_index in range(channel):
-        #     name = "gru_" + str(channel_index)
-        #     item_x = tf.transpose(rnn_features[channel_index], [0, 2, 1])  # [?, 25, 10] for item in 16
-        #     cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, name=name)
-        #     item_out = cell(inputs=item_x)  # [?, 25, 32]
+        # for _index in range(4):
+        #     name = "gru_" + str(_index)
+        #     cell = tf.keras.layers.CuDNNLSTM(units=32, name=name)
+        #     item_out = cell(inputs=x_rnns[_index])  # [?, 25, rnn_units]
         #     cell = None
         #
         #     rnn_output.append(item_out)
         #
-        # output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*16=32*16]
-        #
-        # d = tf.keras.layers.Dropout(drop_rate)(output)
-        # logits = self.fc(d)
+        # output = tf.concat(rnn_output, 1)  # [?, self.rnn_units*4]
+        # drop = tf.keras.layers.Dropout(rate=drop_rate)(output)
+        # logits = self.fc2(drop)
         ####################################################################
         # drop = tf.keras.layers.Dropout(rate=drop_rate)
         # fla = self.fla(x_rnn)
         # fc1 = self.fc1(fla)
         # fc1 = drop(fc1)
         # logits = self.fc2(fc1)
+        ####################################################################
+        # cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units)
+        # drop = tf.keras.layers.Dropout(rate=drop_rate)
+        #
+        # cell_out = cell(x_rnn)
+        # cell_out = drop(cell_out)
+        # logits = self.fc2(cell_out)
 
         return logits
