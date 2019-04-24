@@ -18,15 +18,14 @@ rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
-num_train_samples = 8472
-batch_size = 64
+batch_size = 92
 epoch = 3  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
 
 def my_learning_rate(epoch_index, step):
     if epoch_index != 0:
-        return 0.005 * (0.5**(epoch_index-1)) / (1 + step * 0.01)
+        return 0.005 * (0.7**(epoch_index-1)) / (1 + step * 0.005)
     else:
         return 0.000001
 
@@ -55,8 +54,8 @@ t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
 logits = t3lm.call(x_ph, drop_rate=drop_rate_ph)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_ph))
-# optimizer = tf.train.RMSPropOptimizer(learning_rate=learing_rate, momentum=0.9).minimize(cost, global_step)
-optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate_ph, momentum=0.9).minimize(cost)
+optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate_ph, momentum=0.8).minimize(cost)
+# optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate_ph).minimize(cost)
 correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(y_ph, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
@@ -100,5 +99,34 @@ while True:
         acc = sess.run(accuracy, feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate})
         loss = sess.run(cost, feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate})
         # lr = sess.run(learing_rate)
-        print('epoch={},item={},[loss={:.3f},acc={:.3f}],lr={:.6f}'.format(epoch_index, step*batch_size, loss, acc, lr))
+        print('epoch={},step={},[loss={:.3f},acc={:.3f}],lr={:.6f}'.format(epoch_index, step, loss, acc, lr))
     step += 1
+
+
+# 对比实验 超参数日志
+pass
+# id=1
+# 3d cnn + fc
+# over=0.8 acc=0.81
+# batch_size = 32
+# epoch = 3
+# lr = 0.0005
+# AdamOptimizer
+pass
+# id=2
+# 3d cnn + lstm + fc
+# over=0.8 acc = 0.89
+# batch_size = 64
+# epoch = 3
+# lr = 0.005
+# AdamOptimizer
+pass
+# id=3
+# 3d cnn + lstm + fc
+# over=0.8 acc = 0.92
+# momentum=0.8
+# batch_size = 92
+# epoch = 3
+# lr = 0.005 * (0.7**(epoch_index-1)) / (1 + step * 0.005)
+# RMSPropOptimizer
+pass
