@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import cv2
 #
 # conda install -c conda-forge librosa
-y, sr = librosa.load('D:/GitHub/ProjectX/sounds_data/mp3/Oriolus+oriolus/Oriolus oriolus_240851.mp3', sr=44100)
+y, sr = librosa.load('D:/GitHub/ProjectX/sounds_data/mp3/Oriolus+oriolus/Oriolus oriolus_414628.mp3', sr=44100)
 t = len(y) / sr
 print(sr, t)
 
@@ -30,7 +30,7 @@ def stack_features(y, sr, bands=80, frames=600):
         # 或者，先分别计算大小不一的音频的log mel_spectrogram,在通过固定的窗口，
         # 切割等大小的频谱图。
         if len(y[start:end]) < window_size:
-            end = len(y)-1
+            end = len(y)
             start = end - window_size
             if start < 0:
                 break
@@ -44,11 +44,11 @@ def stack_features(y, sr, bands=80, frames=600):
     return features3d
 
 
-mel = stack_features(y, sr)[0]
+mel = stack_features(y, sr)[3]
 
 plt.figure()
-plt.subplot(2, 1, 1)
-librosa.display.specshow(mel[:, 400:600], y_axis='mel', fmax=22100, x_axis='time')
+plt.subplot(3, 1, 1)
+librosa.display.specshow(mel, y_axis='mel', fmax=44100, x_axis='time')
 
 plt.colorbar()
 plt.tight_layout()

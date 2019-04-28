@@ -46,9 +46,9 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # self.fc1 = tf.keras.layers.Dense(units=128, use_bias=True, activation=None,
         #                                  kernel_initializer=tf.keras.initializers.he_normal(),
         #                                  bias_initializer=tf.constant_initializer)
-        self.fc2 = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
-                                         kernel_initializer=tf.keras.initializers.he_normal(),
-                                         bias_initializer=tf.constant_initializer)
+        # self.fc2 = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
+        #                                  kernel_initializer=tf.keras.initializers.he_normal(),
+        #                                  bias_initializer=tf.constant_initializer)
 
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
@@ -123,11 +123,13 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # fc1 = drop(fc1)
         # logits = self.fc2(fc1)
         ####################################################################
-        # cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units)
+        # cell = tf.keras.layers.CuDNNLSTM(units=self.rnn_units, return_sequences=True)
+        # cell2 = tf.keras.layers.CuDNNLSTM(units=self.rnn_units)
         # drop = tf.keras.layers.Dropout(rate=drop_rate)
         #
-        # cell_out = cell(x_rnn)
-        # cell_out = drop(cell_out)
+        # cell_out1 = cell(x_rnn)
+        # cell_out2 = cell2(cell_out1)
+        # cell_out = drop(cell_out2)
         # logits = self.fc2(cell_out)
 
         return logits

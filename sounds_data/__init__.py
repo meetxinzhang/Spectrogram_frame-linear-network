@@ -19,8 +19,7 @@ def file2img(file_dir):
                     continue
                 else:
                     y, sr = librosa.load(filename, sr=None)
-                    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=80, n_fft=1024, hop_length=512,
-                                                         power=2.0)
+                    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=80, n_fft=1024, hop_length=512, power=2.0)
                     logspec = librosa.amplitude_to_db(mel)
 
                     try:

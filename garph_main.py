@@ -25,9 +25,10 @@ display_step = 1
 
 def my_learning_rate(epoch_index, step):
     if epoch_index != 0:
-        return 0.005 * (0.7**(epoch_index-1)) / (1 + step * 0.005)
+        # return 0.005 * (0.7**(epoch_index-1)) / (1 + step * 0.005)
+        return 0.001
     else:
-        return 0.000001
+        return 0
 
 
 
@@ -54,8 +55,8 @@ t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
 logits = t3lm.call(x_ph, drop_rate=drop_rate_ph)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_ph))
-optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate_ph, momentum=0.8).minimize(cost)
-# optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate_ph).minimize(cost)
+# optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate_ph, momentum=0.9).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.0008).minimize(cost)
 correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(y_ph, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
