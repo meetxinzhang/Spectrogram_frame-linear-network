@@ -14,7 +14,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
                                                   data_format='channels_last')
 
         self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
@@ -22,7 +22,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
                                               data_format='channels_last')
-        self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+        self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
                                                   data_format='channels_last')
 
         self.conv3d3 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
@@ -38,7 +38,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         #                                       kernel_initializer=tf.keras.initializers.he_normal(),
         #                                       bias_initializer=tf.zeros_initializer(),
         #                                       data_format='channels_last')
-        # self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
+        # self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 1, 1], strides=[3, 1, 1], padding='same',
         #                                           data_format='channels_last')
 
         # FC
@@ -54,14 +54,14 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         """
         :param **kwargs:
         :param **kwargs:
-        :param input: [?, 11, 80, 200, 1]
+        :param input: [?, 21, 80, 200, 1]
         :return:
         """
         is_training = tf.equal(drop_rate, 0.3)
 
         conv1 = self.conv3d1(inputs)
         conv1 = tf.layers.batch_normalization(conv1, training=is_training)
-        pool1 = self.pooling1(conv1)  # (?, 6, 40, 100, 8)
+        pool1 = self.pooling1(conv1)  # (?, 7, 40, 100, 8)
         # print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
@@ -76,7 +76,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         # conv4 = self.conv3d4(pool3)
         # conv4 = tf.layers.batch_normalization(conv4, training=is_training)
-        # pool4 = self.pooling4(conv4)  # (?, 1, 5, 13, 4)
+        # pool4 = self.pooling4(conv4)  # (?, 1, 10, 25, 4)
 
         x_rnn = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 4)
         ##################################################################

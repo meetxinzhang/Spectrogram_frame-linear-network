@@ -129,10 +129,10 @@ def get_features_3dmat(fileneme, move_stride, depth):
 
     features3d = stack_features(logspec, move_stride=move_stride, depth=depth)
 
-    len_feat = len(features3d)
-    if len_feat < depth:
-        # 时长： 10.5， len=8
-        raise MyException('该数据时长不够：{}'.format(np.shape(logspec)))
+    # len_feat = len(features3d)
+    # if len_feat < depth:
+    #     # 时长： 10.5， len=8
+    #     raise MyException('该数据时长不够：{}'.format(np.shape(logspec)))
 
     return features3d
 
@@ -153,7 +153,7 @@ def stack_features(mat, move_stride=100, depth=7):
         fragment = mat[:, start:end]  # 不包括第end列哦
         features3d.append(fragment)
 
-    if len(features3d)*window_size < row:
+    if window_size + (len(features3d)-1)*move_stride < row:
         end = row
         start = end - window_size
         fragment_last = mat[:, start:end]
