@@ -43,13 +43,13 @@ def cal_loss(logits, lab_batch):
 t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
 
 step = 1
-while step * batch_size < 9999:
+while True:
     batch_x, batch_y, epoch_index = fuckdata.next_batch(batch_size=batch_size, epoch=epoch)
     learning_rate = my_learning_rate(epoch_index, step)
     if epoch_index != 0:
         d_rate = drop_rate
     else:
-        d_rate = 0
+        d_rate = 0.0
 
     with tf.GradientTape() as tape:
         logits = t3lm.call(batch_x, drop_rate=d_rate)
@@ -62,5 +62,6 @@ while step * batch_size < 9999:
     correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(batch_y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-    print('loss:{:.3f}, acc:{:.3f}, lr:{:.4f}'.format(loss, accuracy, learning_rate))
+    print('epoch:{}, stpe:{}, loss:{:.3f}, acc:{:.3f}, lr:{:.4f}'.
+          format(epoch_index, step, loss, accuracy, learning_rate))
     step += 1

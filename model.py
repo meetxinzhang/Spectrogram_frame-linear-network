@@ -1,4 +1,5 @@
 import tensorflow as tf
+from PIL import Image
 
 
 class The3dcnn_lstm_Model(tf.keras.Model):
@@ -13,33 +14,25 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                                               activation=tf.nn.leaky_relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
-                                              data_format='channels_last')
+                                              data_format='channels_first')
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
-                                                  data_format='channels_last')
+                                                  data_format='channels_first')
 
         self.conv3d2 = tf.keras.layers.Conv3D(filters=12, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.leaky_relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
-                                              data_format='channels_last')
+                                              data_format='channels_first')
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
-                                                  data_format='channels_last')
+                                                  data_format='channels_first')
 
         self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.leaky_relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
-                                              data_format='channels_last')
+                                              data_format='channels_first')
         self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[3, 2, 2], strides=[3, 2, 2], padding='same',
-                                                  data_format='channels_last')
-
-        # self.conv3d4 = tf.keras.layers.Conv3D(filters=4, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
-        #                                       activation=tf.nn.leaky_relu, padding='same',
-        #                                       kernel_initializer=tf.keras.initializers.he_normal(),
-        #                                       bias_initializer=tf.zeros_initializer(),
-        #                                       data_format='channels_last')
-        # self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 1, 1], strides=[3, 1, 1], padding='same',
-        #                                           data_format='channels_last')
+                                                  data_format='channels_first')
 
         self.cell1 = tf.keras.layers.CuDNNGRU(units=80, return_sequences=True)
         self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)
@@ -58,35 +51,37 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         """
         :param **kwargs:
         :param **kwargs:
-        :param input: [?, 11, 80, 200, 1]
+        :param input: [?, 1, 11, 80, 200]
         :return:
         """
+        # print('inputs: ', np.shape(inputs))
         is_training = tf.equal(drop_rate, 0.3)
 
         conv1 = self.conv3d1(inputs)
         # conv1 = tf.layers.batch_normalization(conv1, training=is_training)
-        pool1 = self.pooling1(conv1)  # (?, 6, 40, 100, 8)
+        pool1 = self.pooling1(conv1)  # (?, 8, 6, 40, 100)
         # print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
         # conv2 = tf.layers.batch_normalization(conv2, training=is_training)
-        pool2 = self.pooling2(conv2)  # (?, 3, 20, 50, 16)
+        pool2 = self.pooling2(conv2)  # (?, 16, 3, 20, 50)
         # print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)
         # conv3 = tf.layers.batch_normalization(conv3, training=is_training)
-        pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 4)
+        pool3 = self.pooling3(conv3)  # (?, 8, 1, 10, 25)
         # print('pool3: ', pool3.get_shape().as_list())
 
-        # conv4 = self.conv3d4(pool3)
-        # conv4 = tf.layers.batch_normalization(conv4, training=is_training)
-        # pool4 = self.pooling4(conv4)  # (?, 1, 10, 25, 4)
-
-        x_rnn = tf.squeeze(pool3, axis=1)  # (?, 10, 25, 4)
+        x_rnn = tf.squeeze(pool3, axis=2)  # (?, 8, 10, 25)
         ##################################################################
-        x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 4]
-        x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度  [?, 25, 10] * 4
-        x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度  [?, 25, 40]
+        # data_format='channels_last'
+        # x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 8]
+        # x_rnns = tf.unstack(x_rnn, axis=-1)  # 展开通道维度  [?, 25, 10] * 8
+        # x_rnn = tf.concat(x_rnns, axis=-1)  # 合并列维度  [?, 25, 80]
+        # data_format='channels_first'
+        x_rnns = tf.unstack(x_rnn, axis=1)  # 展开通道维度  [8, ?, 10, 25]
+        x_rnn = tf.concat(x_rnns, axis=1)  # 合并列维度  [?, 80, 25]
+        x_rnn = tf.transpose(x_rnn, [0, 2, 1])  # [?, 25, 80]
 
         # rnn_output = []
         # for i in range(self.num_class):
@@ -132,3 +127,37 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         logits = self.cell2(cell_out1)
 
         return logits
+
+    def draw_hid_features(self, inputs, batch):
+        """
+        :param inputs: [?, 1, 11, 80, 200]
+        :param mats: [?, 8, 10, 25]
+        :return: 画图
+        """
+        import numpy
+        inputs = numpy.squeeze(inputs)  # [?, 11, 80, 200]
+
+        index_batch = 0
+        for sample in batch:
+            # [8, 10, 25]
+            index_chennel = 0
+
+            yuan_tus = inputs[index_batch, :, :, :]
+            y1 = yuan_tus[0]
+            y2 = yuan_tus[5]
+            y3 = yuan_tus[10]
+            yuan_tu = numpy.hstack(y1, y2, y3)
+            save_path = 'hid_pic' + '/' + str(index_batch) + '/' + 'yuan_tu.jpg'
+            Image.fromarray(yuan_tu).save(save_path)
+
+            for feature in sample:
+                # [10, 25]
+                save_path = 'hid_pic' + '/' + str(index_batch) + '/' + str(index_chennel) + '.jpg'
+                Image.fromarray(feature[:, :]).save(save_path)
+
+                index_chennel += 1
+            index_batch += 1
+
+
+
+

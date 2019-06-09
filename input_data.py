@@ -40,7 +40,7 @@ class input_data(object):
         lab_list = list(temp[:, 1])
 
         n_total = len(filenames_list)
-        n_test = int(n_total*0.3)
+        n_test = int(n_total*0.1)
 
         test_fnames = filenames_list[0:n_test]
         test_labs = lab_list[0:n_test]
@@ -91,7 +91,7 @@ class input_data(object):
             else:
                 imagePath = self.test_fnames[self.file_point]
             try:
-                # list.shape=[5, 80, 200] 这里可以换成其他任何读取单个样本的数据
+                # list.shape=[11, 80, 200] 这里可以换成其他任何读取单个样本的数据
                 features = build_3d_input.get_features_3dmat(imagePath, move_stride=self.move_stride, depth=self.depth)
             except EOFError:
                 print('EOFError', imagePath)
@@ -105,7 +105,7 @@ class input_data(object):
                 continue
 
             # 添加颜色通道
-            features = np.expand_dims(features, axis=-1)
+            features = np.expand_dims(features, axis=0)
             x_data.append(features)  # (image.data, dtype='float32')
 
             # ##########标签##############

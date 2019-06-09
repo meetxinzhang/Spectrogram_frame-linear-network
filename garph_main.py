@@ -40,7 +40,7 @@ logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()
 fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
                                  move_stride=move_stride, depth=depth, num_class=num_class)
 
-x_ph = tf.placeholder("float", [None, depth, height, wigth, chennel])
+x_ph = tf.placeholder("float", [None, chennel, depth, height, wigth])
 y_ph = tf.placeholder("float", [None, num_class])
 drop_rate_ph = tf.placeholder(tf.float32)
 learning_rate_ph = tf.placeholder(tf.float32)
