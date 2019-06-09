@@ -41,8 +41,8 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         # self.pooling4 = tf.keras.layers.MaxPool3D(pool_size=[3, 1, 1], strides=[3, 1, 1], padding='same',
         #                                           data_format='channels_last')
 
-        self.cell1 = tf.keras.layers.CuDNNLSTM(units=40, return_sequences=True)
-        self.cell2 = tf.keras.layers.CuDNNLSTM(units=self.num_class)
+        self.cell1 = tf.keras.layers.CuDNNGRU(units=80, return_sequences=True)
+        self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)
         # drop = tf.keras.layers.Dropout(rate=drop_rate)
 
         # FC
@@ -64,17 +64,17 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         is_training = tf.equal(drop_rate, 0.3)
 
         conv1 = self.conv3d1(inputs)
-        conv1 = tf.layers.batch_normalization(conv1, training=is_training)
+        # conv1 = tf.layers.batch_normalization(conv1, training=is_training)
         pool1 = self.pooling1(conv1)  # (?, 6, 40, 100, 8)
         # print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
-        conv2 = tf.layers.batch_normalization(conv2, training=is_training)
+        # conv2 = tf.layers.batch_normalization(conv2, training=is_training)
         pool2 = self.pooling2(conv2)  # (?, 3, 20, 50, 16)
         # print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)
-        conv3 = tf.layers.batch_normalization(conv3, training=is_training)
+        # conv3 = tf.layers.batch_normalization(conv3, training=is_training)
         pool3 = self.pooling3(conv3)  # (?, 1, 10, 25, 4)
         # print('pool3: ', pool3.get_shape().as_list())
 
