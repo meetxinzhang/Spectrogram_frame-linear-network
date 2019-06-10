@@ -1,5 +1,7 @@
 import tensorflow as tf
 from PIL import Image
+import scipy.misc
+import os
 
 
 class The3dcnn_lstm_Model(tf.keras.Model):
@@ -18,7 +20,7 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
-        self.conv3d2 = tf.keras.layers.Conv3D(filters=12, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
+        self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.leaky_relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.he_normal(),
                                               bias_initializer=tf.zeros_initializer(),
@@ -36,6 +38,10 @@ class The3dcnn_lstm_Model(tf.keras.Model):
 
         self.cell1 = tf.keras.layers.CuDNNGRU(units=80, return_sequences=True)
         self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)
+
+        self.bn1 = tf.keras.layers.BatchNormalization()
+        self.bn2 = tf.keras.layers.BatchNormalization()
+        self.bn3 = tf.keras.layers.BatchNormalization()
         # drop = tf.keras.layers.Dropout(rate=drop_rate)
 
         # FC
@@ -58,21 +64,23 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         is_training = tf.equal(drop_rate, 0.3)
 
         conv1 = self.conv3d1(inputs)
-        # conv1 = tf.layers.batch_normalization(conv1, training=is_training)
+        conv1 = self.bn1(conv1, training=is_training)
         pool1 = self.pooling1(conv1)  # (?, 8, 6, 40, 100)
         # print('pool1: ', pool1.get_shape().as_list())
 
         conv2 = self.conv3d2(pool1)
-        # conv2 = tf.layers.batch_normalization(conv2, training=is_training)
+        conv2 = self.bn2(conv2, training=is_training)
         pool2 = self.pooling2(conv2)  # (?, 16, 3, 20, 50)
         # print('pool2: ', pool2.get_shape().as_list())
 
         conv3 = self.conv3d3(pool2)
-        # conv3 = tf.layers.batch_normalization(conv3, training=is_training)
+        conv3 = self.bn3(conv3, training=is_training)
         pool3 = self.pooling3(conv3)  # (?, 8, 1, 10, 25)
         # print('pool3: ', pool3.get_shape().as_list())
 
         x_rnn = tf.squeeze(pool3, axis=2)  # (?, 8, 10, 25)
+        if not is_training:
+            self.draw_hid_features(inputs, x_rnn)
         ##################################################################
         # data_format='channels_last'
         # x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 8]
@@ -131,11 +139,12 @@ class The3dcnn_lstm_Model(tf.keras.Model):
     def draw_hid_features(self, inputs, batch):
         """
         :param inputs: [?, 1, 11, 80, 200]
-        :param mats: [?, 8, 10, 25]
+        :param batch: [?, 8, 10, 25]
         :return: 画图
         """
         import numpy
         inputs = numpy.squeeze(inputs)  # [?, 11, 80, 200]
+        batch = batch.numpy()
 
         index_batch = 0
         for sample in batch:
@@ -146,14 +155,17 @@ class The3dcnn_lstm_Model(tf.keras.Model):
             y1 = yuan_tus[0]
             y2 = yuan_tus[5]
             y3 = yuan_tus[10]
-            yuan_tu = numpy.hstack(y1, y2, y3)
-            save_path = 'hid_pic' + '/' + str(index_batch) + '/' + 'yuan_tu.jpg'
-            Image.fromarray(yuan_tu).save(save_path)
+            yuan_tu = numpy.hstack([y1, y2, y3])
+            save_dir = 'hid_pic' + '/' + str(index_batch) + '/'
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+            Image.fromarray(yuan_tu).convert('RGB').save(save_dir + 'yuan_tu.jpg')
 
             for feature in sample:
-                # [10, 25]
+                # [10, 25]u
                 save_path = 'hid_pic' + '/' + str(index_batch) + '/' + str(index_chennel) + '.jpg'
-                Image.fromarray(feature[:, :]).save(save_path)
+                scipy.misc.imsave(save_path, feature)
+                # Image.fromarray(feature).convert('RGB').save(save_path)
 
                 index_chennel += 1
             index_batch += 1

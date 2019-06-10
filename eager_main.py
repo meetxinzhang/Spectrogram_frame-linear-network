@@ -17,7 +17,7 @@ drop_rate = 0.3
 num_class = 4
 
 batch_size = 64
-epoch = 3  # 训练的 epoch 数，从1开始计数
+epoch = 2  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
 
@@ -41,6 +41,8 @@ def cal_loss(logits, lab_batch):
 
 
 t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
+optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, momentum=0.8)
+# optimizer = tf.keras.optimizers.RMSprop(lr=0.001)
 
 step = 1
 while True:
@@ -55,9 +57,8 @@ while True:
         logits = t3lm.call(batch_x, drop_rate=d_rate)
         loss = cal_loss(logits, batch_y)
 
-    optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate, momentum=0.8)
-    grads = tape.gradient(loss, t3lm.variables)
-    optimizer.apply_gradients(zip(grads, t3lm.variables))
+    grads = tape.gradient(loss, t3lm.trainable_variables)
+    optimizer.apply_gradients(zip(grads, t3lm.trainable_variables))
 
     correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(batch_y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
