@@ -40,7 +40,7 @@ class input_data(object):
         lab_list = list(temp[:, 1])
 
         n_total = len(filenames_list)
-        n_test = int(n_total*0.1)
+        n_test = int(n_total*0.3)
 
         test_fnames = filenames_list[0:n_test]
         test_labs = lab_list[0:n_test]

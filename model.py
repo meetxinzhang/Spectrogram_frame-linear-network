@@ -28,6 +28,14 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
+        self.conv3d25 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 1, 1], strides=[1, 1, 1], use_bias=True,
+                                               activation=tf.nn.leaky_relu, padding='same',
+                                               kernel_initializer=tf.keras.initializers.he_normal(),
+                                               bias_initializer=tf.zeros_initializer(),
+                                               data_format='channels_first')
+        self.pooling25 = tf.keras.layers.MaxPool3D(pool_size=[2, 1, 1], strides=[2, 1, 1], padding='same',
+                                                   data_format='channels_first')
+
         self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.leaky_relu, padding='same',
                                               kernel_initializer=tf.keras.initializers.he_normal(),
@@ -42,8 +50,8 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.bn3 = tf.keras.layers.BatchNormalization()
-        # drop = tf.keras.layers.Dropout(rate=drop_rate)
 
+        # drop = tf.keras.layers.Dropout(rate=drop_rate)
         # FC
         # self.fla = tf.keras.layers.Flatten(data_format='channels_last')
         # self.fc1 = tf.keras.layers.Dense(units=128, use_bias=True, activation=None,
@@ -73,14 +81,17 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         pool2 = self.pooling2(conv2)  # (?, 16, 3, 20, 50)
         # print('pool2: ', pool2.get_shape().as_list())
 
-        conv3 = self.conv3d3(pool2)
+        conv25 = self.conv3d25(pool2)
+        pool25 = self.pooling25(conv25)  # (?, 16, 3, 20, 50)
+
+        conv3 = self.conv3d3(pool25)
         conv3 = self.bn3(conv3, training=is_training)
         pool3 = self.pooling3(conv3)  # (?, 8, 1, 10, 25)
         # print('pool3: ', pool3.get_shape().as_list())
 
         x_rnn = tf.squeeze(pool3, axis=2)  # (?, 8, 10, 25)
-        if not is_training:
-            self.draw_hid_features(inputs, x_rnn)
+        # if not is_training:
+        #     self.draw_hid_features(inputs, x_rnn)
         ##################################################################
         # data_format='channels_last'
         # x_rnn = tf.transpose(x_rnn, [0, 2, 1, 3])  # [?, 25, 10, 8]
@@ -170,6 +181,5 @@ class The3dcnn_lstm_Model(tf.keras.Model):
                 index_chennel += 1
             index_batch += 1
 
-
-
-
+############
+# 8 16 8

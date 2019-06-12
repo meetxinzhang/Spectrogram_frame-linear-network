@@ -8,7 +8,7 @@ import input_data
 sess = tf.InteractiveSession()
 
 # model
-move_stride = int(200-(200*0.8))
+move_stride = int(200-(200*0.9))
 depth = math.ceil((600-200)/move_stride)+1
 print('depth:{}, move_stride:{}'.format(depth, move_stride))
 height = 80
@@ -25,8 +25,8 @@ display_step = 1
 
 def my_learning_rate(epoch_index, step):
     if epoch_index != 0:
-        return 0.001 * (0.7**(epoch_index-1)) / (1 + step * 0.000001)
-        # return 0.001
+        # return 0.001 * (0.7**(epoch_index-1)) / (1 + step * 0.000001)
+        return 0.001
     else:
         return 0.000001
 
