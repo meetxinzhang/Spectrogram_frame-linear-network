@@ -28,13 +28,13 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
-        self.conv3d25 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 1, 1], strides=[1, 1, 1], use_bias=True,
-                                               activation=tf.nn.leaky_relu, padding='same',
-                                               kernel_initializer=tf.keras.initializers.he_normal(),
-                                               bias_initializer=tf.zeros_initializer(),
-                                               data_format='channels_first')
-        self.pooling25 = tf.keras.layers.MaxPool3D(pool_size=[2, 1, 1], strides=[2, 1, 1], padding='same',
-                                                   data_format='channels_first')
+        # self.conv3d25 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 1, 1], strides=[1, 1, 1], use_bias=True,
+        #                                        activation=tf.nn.leaky_relu, padding='same',
+        #                                        kernel_initializer=tf.keras.initializers.he_normal(),
+        #                                        bias_initializer=tf.zeros_initializer(),
+        #                                        data_format='channels_first')
+        # self.pooling25 = tf.keras.layers.MaxPool3D(pool_size=[2, 1, 1], strides=[2, 1, 1], padding='same',
+        #                                            data_format='channels_first')
 
         self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 3, 3], strides=[1, 1, 1], use_bias=True,
                                               activation=tf.nn.leaky_relu, padding='same',
@@ -81,10 +81,10 @@ class The3dcnn_lstm_Model(tf.keras.Model):
         pool2 = self.pooling2(conv2)  # (?, 16, 3, 20, 50)
         # print('pool2: ', pool2.get_shape().as_list())
 
-        conv25 = self.conv3d25(pool2)
-        pool25 = self.pooling25(conv25)  # (?, 16, 3, 20, 50)
+        # conv25 = self.conv3d25(pool2)
+        # pool25 = self.pooling25(conv25)  # (?, 16, 3, 20, 50)
 
-        conv3 = self.conv3d3(pool25)
+        conv3 = self.conv3d3(pool2)
         conv3 = self.bn3(conv3, training=is_training)
         pool3 = self.pooling3(conv3)  # (?, 8, 1, 10, 25)
         # print('pool3: ', pool3.get_shape().as_list())

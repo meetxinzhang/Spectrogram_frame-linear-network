@@ -2,7 +2,7 @@ from tensorboard.backend.event_processing import event_accumulator
 import matplotlib.pyplot as plt
 
 # 加载日志数据
-ea_09 = event_accumulator.EventAccumulator('D:/GitHub/ProjectX/tensor_logs/over09/train/events.out.tfevents.1560330514.localhost.localdomain')
+ea_09 = event_accumulator.EventAccumulator('D:/GitHub/ProjectX/tensor_logs/over09_f/train/events.out.tfevents.1556092927.localhost.localdomain')
 ea_09.Reload()
 ea_08 = event_accumulator.EventAccumulator('D:/GitHub/ProjectX/tensor_logs/2019-04-24-15-20-54/train/events.out.tfevents.1556090456.localhost.localdomain')
 ea_08.Reload()
@@ -14,7 +14,7 @@ ea_05 = event_accumulator.EventAccumulator('D:/GitHub/ProjectX/tensor_logs/over0
 ea_05.Reload()
 print(ea_08.scalars.Keys())
 
-line_name = 'loss'
+line_name = 'accuracy'
 line_09 = ea_09.scalars.Items(line_name)
 line_08 = ea_08.scalars.Items(line_name)
 line_07 = ea_07.scalars.Items(line_name)
@@ -28,11 +28,11 @@ ax1 = fig.add_subplot(111)
 
 # ax1.set_xlim(0)
 
-ax1.plot([i.step for i in line_09], [i.value for i in line_09], label='90%')
-ax1.plot([i.step for i in line_08], [i.value for i in line_08], label='80%')
-ax1.plot([i.step for i in line_07], [i.value for i in line_07], label='70%')
-ax1.plot([i.step for i in line_06], [i.value for i in line_06], label='60%')
-ax1.plot([i.step for i in line_05], [i.value for i in line_05], label='50%')
+ax1.plot([i.step for i in line_09], [i.value for i in line_09], label='0.9')
+ax1.plot([i.step for i in line_08], [i.value for i in line_08], label='0.8')
+ax1.plot([i.step for i in line_07], [i.value for i in line_07], label='0.7')
+ax1.plot([i.step for i in line_06], [i.value for i in line_06], label='0.6')
+ax1.plot([i.step for i in line_05], [i.value for i in line_05], label='0.5')
 
 # 设置刻度字体大小
 plt.xticks(fontsize=18)

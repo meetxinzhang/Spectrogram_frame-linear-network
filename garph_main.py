@@ -8,7 +8,7 @@ import input_data
 sess = tf.InteractiveSession()
 
 # model
-move_stride = int(200-(200*0.9))
+move_stride = int(200-(200*0.8))
 depth = math.ceil((600-200)/move_stride)+1
 print('depth:{}, move_stride:{}'.format(depth, move_stride))
 height = 80
@@ -18,15 +18,15 @@ rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
-batch_size = 64
+batch_size = 92
 epoch = 3  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
 
 def my_learning_rate(epoch_index, step):
     if epoch_index != 0:
-        # return 0.001 * (0.7**(epoch_index-1)) / (1 + step * 0.000001)
-        return 0.001
+        return 0.001 * (0.7**(epoch_index-1)) / (1 + step * 0.000001)
+        # return 0.001
     else:
         return 0.000001
 
@@ -131,7 +131,7 @@ pass
 # lr = 0.005 * (0.7**(epoch_index-1)) / (1 + step * 0.005)
 # RMSPropOptimizer
 pass
-# id=2019-04-24-16-02-05
+# id=over09_f
 # 3d cnn + lstm分通道 + fc
 # acc = 0.85
 # 其他同上

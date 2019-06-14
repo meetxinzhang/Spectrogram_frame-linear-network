@@ -2,9 +2,12 @@
 import tensorflow as tf
 import model
 import math
+import time
 import input_data
 from MyException import MyException
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.rcParams['font.size'] = 18
 tf.enable_eager_execution()
 
 # model
@@ -18,15 +21,17 @@ rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
-batch_size = 64
-epoch = 2  # 训练的 epoch 数，从1开始计数
+batch_size = 92
+epoch = 3  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
 loss_history = []
 acc_history = []
+test_loss_history = []
+test_acc_history = []
 
 
-logs_path = 'tensor_logs/'
+logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
                                  move_stride=move_stride, depth=depth, num_class=num_class)
 
@@ -47,10 +52,12 @@ def cal_loss(logits, lab_batch):
 
 t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
 optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, momentum=0.8)
-# optimizer = tf.keras.optimizers.RMSprop(lr=0.001)
+
+# 定义 Tensorboard 的事件文件路径
+summary_train_writer = tf.contrib.summary.create_file_writer(logs_path + '/train')
+summary_test_writer = tf.contrib.summary.create_file_writer(logs_path + '/test')
 
 step = 1
-
 try:  # 捕获 input_data 在数据输送结束时的异常
     while True:
         batch_x, batch_y, epoch_index = fuckdata.next_batch(batch_size=batch_size, epoch=epoch)
@@ -60,34 +67,61 @@ try:  # 捕获 input_data 在数据输送结束时的异常
         else:
             d_rate = 0.0
 
-        with tf.GradientTape() as tape:
-            logits = t3lm.call(batch_x, drop_rate=d_rate)
-            loss = cal_loss(logits, batch_y)
+        with summary_train_writer.as_default(), tf.contrib.summary.always_record_summaries():
+            # model code goes here
+            # and in it call
+            with tf.GradientTape() as tape:
+                logits = t3lm.call(batch_x, drop_rate=d_rate)
+                loss = cal_loss(logits, batch_y)
 
-        grads = tape.gradient(loss, t3lm.trainable_variables)
-        optimizer.apply_gradients(zip(grads, t3lm.trainable_variables))
+            grads = tape.gradient(loss, t3lm.trainable_variables)
+            optimizer.apply_gradients(zip(grads, t3lm.trainable_variables))
 
-        correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(batch_y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+            correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(batch_y, 1))
+            accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-        loss_history.append(loss.numpy())
-        acc_history.append(accuracy)
+            tf.contrib.summary.scalar("loss", loss)
+            tf.contrib.summary.scalar("accuracy", accuracy)
+            # In this case every call to tf.contrib.summary.scalar will generate a record
+            # ...
+
+        if epoch_index != 0:
+            loss_history.append(loss.numpy())
+            acc_history.append(accuracy)
+        else:
+            test_loss_history.append(loss.numpy())
+            test_acc_history.append(accuracy)
 
         print('epoch:{}, stpe:{}, loss:{:.3f}, acc:{:.3f}, lr:{:.4f}'.
               format(epoch_index, step, loss, accuracy, learning_rate))
+
         step += 1
 
+
 except MyException as e:  # 画图
-    fig = plt.figure(figsize=(6, 4))
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(12, 8))
+    colors1 = 'C0'
+    colors2 = 'C1'
 
-    plt.plot(loss_history)
-    plt.xlabel('Batch [64]')
-    plt.ylabel('Loss [entropy]')
+    axs[0, 0].plot(acc_history, label='train', color=colors1)
+    axs[0, 0].legend(loc='lower right')
+    axs[0, 0].set_xlabel('step')
+    axs[0, 0].set_ylabel('accuracy')
 
-    # 设置刻度字体大小
-    plt.xticks(fontsize=18)
-    plt.yticks(fontsize=18)
+    axs[0, 1].plot(loss_history, label='train', color=colors1)
+    axs[0, 1].legend(loc='lower right')
+    axs[0, 1].set_xlabel('step')
+    axs[0, 1].set_ylabel('loss')
 
-    plt.legend(loc='lower right', fontsize=18)
+    axs[1, 0].plot(test_acc_history, label='test', color=colors1)
+    axs[1, 0].legend(loc='lower right')
+    axs[1, 0].set_xlabel('step')
+    axs[1, 0].set_ylabel('accuracy')
+
+    axs[1, 1].plot(test_loss_history, label='test', color=colors1)
+    axs[1, 1].legend(loc='lower right')
+    axs[1, 1].set_xlabel('step')
+    axs[1, 1].set_ylabel('loss')
+
     plt.show()
 
