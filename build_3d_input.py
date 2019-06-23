@@ -118,7 +118,7 @@ import cv2
 #     return logspec
 
 
-def get_features_3dmat(fileneme, move_stride, depth):
+def get_features_3dmat(fileneme, window_size, move_stride, depth):
     # y, sr = librosa.load(fileneme, sr=None)
     #
     # mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=height, n_fft=1024, hop_length=512, power=2.0)
@@ -127,7 +127,7 @@ def get_features_3dmat(fileneme, move_stride, depth):
     # logspec = np.asarray(scipy.misc.toimage(logspec))
     logspec = np.asarray(Image.open(fileneme))
 
-    features3d = stack_features(logspec, move_stride=move_stride, depth=depth)
+    features3d = stack_features(logspec, window_size=window_size, move_stride=move_stride, depth=depth)
 
     # len_feat = len(features3d)
     # if len_feat < depth:
@@ -144,8 +144,7 @@ def windows(row, window_size, move_stride):
         start += move_stride
 
 
-def stack_features(mat, move_stride=100, depth=7):
-    window_size = 200
+def stack_features(mat, window_size=200, move_stride=100, depth=7):
     features3d = []
 
     row = np.shape(mat)[1]

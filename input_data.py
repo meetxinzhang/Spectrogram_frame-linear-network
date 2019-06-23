@@ -7,13 +7,14 @@ from class_names import class_names
 
 class input_data(object):
 
-    def __init__(self, file_dir, move_stride=100, depth=10, num_class=4):
+    def __init__(self, file_dir, width=200, move_stride=100, depth=10, num_class=4):
         self.file_dir = file_dir
         self.training = True
         self.epoch_index = 1  # epoch次数指针，训练从1开始
         self.file_point = 0  # 第0个epoch表示测试集
 
         self.depth = depth
+        self.width = width
         self.move_stride = move_stride
         self.num_class = num_class
 
@@ -92,7 +93,7 @@ class input_data(object):
                 imagePath = self.test_fnames[self.file_point]
             try:
                 # list.shape=[11, 80, 200] 这里可以换成其他任何读取单个样本的数据
-                features = build_3d_input.get_features_3dmat(imagePath, move_stride=self.move_stride, depth=self.depth)
+                features = build_3d_input.get_features_3dmat(imagePath, window_size=self.width, move_stride=self.move_stride, depth=self.depth)
             except EOFError:
                 print('EOFError', imagePath)
                 self.file_point += 1

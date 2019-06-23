@@ -5,7 +5,7 @@ matplotlib.rcParams['font.size'] = 18
 
 # 加载日志数据
 ea = event_accumulator.\
-    EventAccumulator('D:/GitHub/ProjectX/tensor_logs/2019-06-14-11-16-01/train/events.out.tfevents.1560482162.localhost.localdomain.v2')
+    EventAccumulator('D:/GitHub/ProjectX/tensor_logs/2019-06-14-11-39-58/train/events.out.tfevents.1560483598.localhost.localdomain.v2')
 ea.Reload()
 
 print(ea.scalars.Keys())

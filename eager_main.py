@@ -11,18 +11,18 @@ matplotlib.rcParams['font.size'] = 18
 tf.enable_eager_execution()
 
 # model
-move_stride = int(200-(200*0.8))
-depth = math.ceil((600-200)/move_stride)+1
-print('depth:{}, move_stride:{}'.format(depth, move_stride))
 height = 80
-wigth = 200
+wigth = 40
 chennel = 1
+move_stride = int(wigth-(wigth*0.0))
+depth = math.ceil((600-wigth)/move_stride)+1
+print('depth:{}, move_stride:{}'.format(depth, move_stride))
 rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
 batch_size = 92
-epoch = 3  # 训练的 epoch 数，从1开始计数
+epoch = 4  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
 loss_history = []
@@ -33,7 +33,7 @@ test_acc_history = []
 
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
-                                 move_stride=move_stride, depth=depth, num_class=num_class)
+                                 width=wigth, move_stride=move_stride, depth=depth, num_class=num_class)
 
 
 def my_learning_rate(epoch_index, step):
@@ -74,8 +74,11 @@ try:  # 捕获 input_data 在数据输送结束时的异常
                 logits = t3lm.call(batch_x, drop_rate=d_rate)
                 loss = cal_loss(logits, batch_y)
 
-            grads = tape.gradient(loss, t3lm.trainable_variables)
-            optimizer.apply_gradients(zip(grads, t3lm.trainable_variables))
+            if epoch_index != 0:
+                grads = tape.gradient(loss, t3lm.trainable_variables)
+                optimizer.apply_gradients(zip(grads, t3lm.trainable_variables))
+            else:
+                pass
 
             correct_pred = tf.equal(tf.argmax(logits, 1), tf.argmax(batch_y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
