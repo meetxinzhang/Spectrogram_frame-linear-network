@@ -12,10 +12,10 @@ tf.enable_eager_execution()
 
 # model
 height = 80
-wigth = 40
-chennel = 1
-move_stride = int(wigth-(wigth*0.0))
-depth = math.ceil((600-wigth)/move_stride)+1
+width = 8
+channel = 1
+move_stride = int(width - (width * 0.0))
+depth = math.ceil((600 - width) / move_stride) + 1
 print('depth:{}, move_stride:{}'.format(depth, move_stride))
 rnn_units = 64
 drop_rate = 0.3
@@ -33,7 +33,7 @@ test_acc_history = []
 
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
-                                 width=wigth, move_stride=move_stride, depth=depth, num_class=num_class)
+                                 width=width, move_stride=move_stride, depth=depth, num_class=num_class)
 
 
 def my_learning_rate(epoch_index, step):
