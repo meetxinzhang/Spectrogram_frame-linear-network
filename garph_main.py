@@ -51,7 +51,7 @@ learning_rate_ph = tf.placeholder(tf.float32)
 # learing_rate = tf.train.exponential_decay(0.1, global_step, 64, 0.7, staircase=False)
 
 ##############################################
-t3lm = model.The3dcnn_lstm_Model(rnn_units=rnn_units, num_class=num_class)
+t3lm = model.Model_X(rnn_units=rnn_units, num_class=num_class)
 logits = t3lm.call(x_ph, drop_rate=drop_rate_ph)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_ph))
