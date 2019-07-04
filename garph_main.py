@@ -122,7 +122,7 @@ pass
 # lr = 0.005
 # AdamOptimizer
 pass
-# id=2019-04-24-15-20-54
+# id=over08
 # 3d cnn + lstm + fc
 # over=0.8 acc = 0.92
 # momentum=0.8
