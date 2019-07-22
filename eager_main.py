@@ -16,7 +16,7 @@ width = 6
 move_stride = int(width - (width * 0.5))
 depth = math.ceil((600 - width) / move_stride) + 1
 print('depth:{}, move_stride:{}'.format(depth, move_stride))
-rnn_units = 64
+rnn_units = 128
 drop_rate = 0.3
 num_class = 4
 

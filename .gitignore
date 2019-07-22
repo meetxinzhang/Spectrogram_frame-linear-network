@@ -1,4 +1,4 @@
-.idea/*
+﻿.idea/*
 logs/*
 tensor_logs/*
 test/*
@@ -7,3 +7,4 @@ test/*
 *.txt
 *.mp3
 *.jpg
+*.png

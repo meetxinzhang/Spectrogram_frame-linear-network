@@ -11,28 +11,24 @@ import scipy.misc
 import cv2
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.rcParams['font.size'] = 10
+matplotlib.rcParams['font.size'] = 18
 matplotlib.rcParams['font.family'] = 'Times New Roman'
+# plt.rcParams['figure.figsize'] = (15, 3)  # 设置figure_size尺寸
 
 
 spe_data = [
-    ['D:/GitHub/ProjectX/sounds_data/mp3/Pica+pica/Pica pica/Pica pica_61988.mp3', 0],  # xiangsi1 0
-    ['D:/GitHub/ProjectX/sounds_data/mp3/Anser+anser/Anser anser_128217.mp3', 2],  # xiangsi2
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_325361.mp3', 2],  # mjmc0
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_288916.mp3', 97],  # mjmc2
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_240851.mp3', 18],  # jt0
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_327400.mp3', 19],  # jt01 5
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_298307.mp3', 0],  # jt00
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_298307.mp3', 12],  # jt
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Pica+pica\Pica pica\Pica pica_104044.mp3', 13],  # jt2
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_329582.mp3', 106],  # btmc0
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_240866.mp3', 18],  # btmc 10
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_240866.mp3', 25],  # btmc2
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_253280.mp3', 1],  # dzaoy
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_372826.mp3', 0],  # gzaoy
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_270420.mp3', 8],  # cd
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_298307.mp3', 9],  # cd0 15
-    ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_329704.mp3', 43],  # cd_zy
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_240851.mp3', 0],  # jt0   Alternating song
+    ['D:/GitHub/ProjectX/sounds_data/mp3/Pica+pica/Pica pica/Pica pica_61988.mp3', 0],  # xiangsi1 0  Pica pica
+    # ['D:/GitHub/ProjectX/sounds_data/mp3/Anser+anser/Anser anser_128217.mp3', 2],  # xiangsi2  Anser anser
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_325361.mp3', 2],  # mjmc0000000
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_240851.mp3', 18],  # jt0   Alternating song
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_327400.mp3', 19],  # jt01 5  Alternating call
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_329582.mp3', 106],  # btmc0  Oriolus oriolus call and song
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_240866.mp3', 18],  # btmc 10  Low frequency noise and jt
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_253280.mp3', 1],  # dzaoy  Low frequency noise
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_372826.mp3', 0],  # gzaoy
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_270420.mp3', 8],  # cd   Overlapping song
+    # ['D:\GitHub\ProjectX\sounds_data\mp3\Oriolus+oriolus\Oriolus oriolus_298307.mp3', 9],  # cd0 15  Overlapping call
 ]
 
 
@@ -70,25 +66,41 @@ for spe in spe_data:
     print(sr, t, index)
 
     signal = stack_features(y)[index]
+
+    ################ 绘制波形图 ####################
+    # fig = plt.figure(figsize=(12, 3))
+    # ax1 = fig.add_subplot(111)
+    # time = np.arange(0, len(signal)) * (1.0 / sr)
+    # ax1.plot([i for i in time], [value for value in signal], 'b', label='Oriolus oriolus')
+    # # 设置刻度字体大小
+    # plt.xticks(fontsize=18)
+    # plt.yticks(fontsize=18)
+    # ax1.set_xlabel("Time", fontsize=18)
+    # ax1.set_ylabel('Amplitude', fontsize=18)
+    # plt.legend(loc='lower right', fontsize=18)
+    ############################################
+
     mel = librosa.feature.melspectrogram(y=signal, sr=sr, n_mels=80, n_fft=1024, hop_length=512, power=2.0)
     logspec = librosa.amplitude_to_db(mel)
+    logspec = logspec[:, 200:500]
 
     plt.figure()
-    plt.subplot(3, 1, 1)
+    plt.subplot(2, 1, 1)
 
-    librosa.display.specshow(logspec, y_axis='mel', fmax=44100, x_axis='time')
+    librosa.display.specshow(logspec, y_axis='mel', fmax=44100, x_axis='frames')
 
     plt.colorbar()
     plt.xlabel('Time')
-    plt.ylabel('Mel scale')
+    plt.ylabel('Mel-Frequency')
     # plt.tight_layout()
     plt.show()
     plt.close()
 
-# # conda install -c conda-forge librosa
+# conda install -c conda-forge librosa
 # y, sr = librosa.load('D:/GitHub/ProjectX/sounds_data/mp3/Oriolus+oriolus/Oriolus oriolus_240851.mp3', sr=44100)
+# y = librosa.to_mono(y)
 # t = len(y) / sr
-# print(sr, t)
+# print(np.shape(y), t)
 #
 #
 # def windows(data, window_size):
@@ -99,6 +111,7 @@ for spe in spe_data:
 #
 #
 # def stack_features(y, sr, bands=80, frames=600):
+#
 #     window_size = 512 * (frames - 1)  # 因为两边会使用填充，所以窗口数目比帧长多1
 #     features3d = []
 #     for (start, end) in windows(y, window_size):
@@ -125,9 +138,11 @@ for spe in spe_data:
 # mel = stack_features(y, sr)[0]
 #
 # plt.figure()
-# plt.subplot(2, 1, 1)
-# librosa.display.specshow(mel[:, 400:600], y_axis='mel', fmax=22100, x_axis='time')
-#
+# plt.subplot(1, 1, 1)
+# librosa.display.specshow(mel, y_axis='mel',  x_axis='frames', fmax=44100)  # x_axis='frames' / 'time'
+# plt.xlabel('Time')
+# # plt.ylabel('Mel scale')
 # plt.colorbar()
 # plt.tight_layout()
 # plt.show()
+# plt.close()
