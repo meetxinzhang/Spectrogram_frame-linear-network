@@ -15,13 +15,8 @@ X 计划
 - 图像标准化
 - 3D图像序列构建
 
-一个3D CNN + LSTMs 鸟类鸣声识别模型
->3D CNN用于特征提取，多个LSTM并列结构，每个LSTM专注于某一种鸟类的识别，每个LSTM只输出一个概率
+一个鸟类鸣声识别模型
 
-这是私有库，保留所有版权，严禁抄袭。
 
-相关比赛
 
-http://otmedia.lirmm.fr/LifeCLEF/BirdCLEF2019/
 
-by Devin Zhang meetdevin.zh@outlook.com
