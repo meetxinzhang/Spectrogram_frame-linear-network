@@ -2,6 +2,8 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
+import numpy as np
+from linear_conv_layer import LinerConv3DLayer
 
 
 class Model_X(tf.keras.Model):
@@ -12,31 +14,35 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
+        self.lcl1 = LinerConv3DLayer(filters=8, kernel_size=[1, 3, 80, 6], activate_size=[3, 3, 3], activate_stride=[3, 1, 1])
+        self.lcl2 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 40, 3], activate_size=[3, 3, 3], activate_stride=[3, 1, 1])
+        self.lcl3 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 20, 2], activate_size=[3, 3, 2], activate_stride=[3, 1, 1])
+
         # 3DCNN
-        self.conv3d1 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 78, 6], strides=[1, 1, 6],
-                                              use_bias=True,
-                                              activation=tf.nn.leaky_relu, padding='same',
-                                              kernel_initializer=tf.keras.initializers.he_normal(),
-                                              bias_initializer=tf.zeros_initializer(),
-                                              data_format='channels_first')
+        # self.conv3d1 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 78, 6], strides=[1, 1, 6],
+        #                                       use_bias=True,
+        #                                       activation=tf.nn.leaky_relu, padding='same',
+        #                                       kernel_initializer=tf.keras.initializers.he_normal(),
+        #                                       bias_initializer=tf.zeros_initializer(),
+        #                                       data_format='channels_first')
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
-        self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 38, 3], strides=[1, 1, 3],
-                                              use_bias=True,
-                                              activation=tf.nn.leaky_relu, padding='same',
-                                              kernel_initializer=tf.keras.initializers.he_normal(),
-                                              bias_initializer=tf.zeros_initializer(),
-                                              data_format='channels_first')
+        # self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 38, 3], strides=[1, 1, 3],
+        #                                       use_bias=True,
+        #                                       activation=tf.nn.leaky_relu, padding='same',
+        #                                       kernel_initializer=tf.keras.initializers.he_normal(),
+        #                                       bias_initializer=tf.zeros_initializer(),
+        #                                       data_format='channels_first')
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
-        self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 19, 2], strides=[1, 1, 2],
-                                              use_bias=True,
-                                              activation=tf.nn.leaky_relu, padding='same',
-                                              kernel_initializer=tf.keras.initializers.he_normal(),
-                                              bias_initializer=tf.zeros_initializer(),
-                                              data_format='channels_first')
+        # self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 19, 2], strides=[1, 1, 2],
+        #                                       use_bias=True,
+        #                                       activation=tf.nn.leaky_relu, padding='same',
+        #                                       kernel_initializer=tf.keras.initializers.he_normal(),
+        #                                       bias_initializer=tf.zeros_initializer(),
+        #                                       data_format='channels_first')
         self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
@@ -47,8 +53,8 @@ class Model_X(tf.keras.Model):
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.bn3 = tf.keras.layers.BatchNormalization()
 
-        self.pooling_a = tf.keras.layers.AveragePooling2D(pool_size=[1, 1, 2], strides=[1, 1, 2], padding='same',
-                                                          data_format='channels_first')
+        # self.pooling_a = tf.keras.layers.AveragePooling2D(pool_size=[1, 1, 2], strides=[1, 1, 2], padding='same',
+        #                                                   data_format='channels_first')
 
         # drop = tf.keras.layers.Dropout(rate=drop_rate)
         # FC
@@ -60,29 +66,40 @@ class Model_X(tf.keras.Model):
         #                                  kernel_initializer=tf.keras.initializers.he_normal(),
         #                                  bias_initializer=tf.constant_initializer)
 
+    def linear_conv_layer(self, x):
+        """
+        :param x: [?, c, d, f, t]
+        :return:
+        """
+
+        return None
+
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
         :param drop_rate: 0.3
-        :param inputs: [?, 1, 100, 80, 6]
+        :param inputs: [?, 1, 199, 80, 6]
         :return: logits
         """
-        # print('inputs: ', np.shape(inputs))
         is_training = tf.equal(drop_rate, 0.3)
 
-        conv1 = self.conv3d1(inputs)
-        conv1 = self.bn1(conv1, training=is_training)
-        pool1 = self.pooling1(conv1)  # (?, 32, 50, 40, 3)
+        # conv1 = self.conv3d1(inputs)
+        sc1 = self.lcl1(inputs)
+        # print('conv1: ', sc1.get_shape().as_list())
+        sc1 = self.bn1(sc1, training=is_training)
+        pool1 = self.pooling1(sc1)  # (?, 32, 50, 40, 3)
         # print('pool1: ', pool1.get_shape().as_list())
 
-        conv2 = self.conv3d2(pool1)
-        conv2 = self.bn2(conv2, training=is_training)
-        pool2 = self.pooling2(conv2)  # (?, 16, 25, 20, 2)
+        # conv2 = self.conv3d2(pool1)
+        lc2 = self.lcl2(pool1)
+        lc2 = self.bn2(lc2, training=is_training)
+        pool2 = self.pooling2(lc2)  # (?, 16, 25, 20, 2)
         # print('pool2: ', pool2.get_shape().as_list())
 
-        conv3 = self.conv3d3(pool2)
-        conv3 = self.bn3(conv3, training=is_training)
-        pool3 = self.pooling3(conv3)  # (?, 8, 13, 10, 1)
-        pool3 = self.pooling_a(pool3)
+        # conv3 = self.conv3d3(pool2)
+        lc3 = self.lcl3(pool2)
+        lc3 = self.bn3(lc3, training=is_training)
+        pool3 = self.pooling3(lc3)  # (?, 8, 13, 10, 1)
+        # pool3 = self.pooling_a(pool3)
         pool3 = tf.squeeze(pool3, axis=-1)  # [?, 8, 13, 10]
         import numpy
         # print('pool3: ', pool3.get_shape().as_list())

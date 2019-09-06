@@ -20,7 +20,7 @@ rnn_units = 128
 drop_rate = 0.3
 num_class = 4
 
-batch_size = 92
+batch_size = 16
 epoch = 4  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
@@ -67,6 +67,8 @@ def cal_loss(logits, lab_batch):
 
 the_model = model.Model_X(rnn_units=rnn_units, num_class=num_class)
 optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, momentum=0.8)
+trainable_vas = the_model.trainable_variables
+print('aaaaaaaa', trainable_vas)
 
 step = 1
 try:  # 捕获 input_data 在数据输送结束时的异常
@@ -83,8 +85,8 @@ try:  # 捕获 input_data 在数据输送结束时的异常
             loss = cal_loss(logits, batch_y)
 
         if epoch_index != 0:
-            grads = tape.gradient(loss, the_model.trainable_variables)
-            optimizer.apply_gradients(zip(grads, the_model.trainable_variables))
+            grads = tape.gradient(loss, trainable_vas)
+            optimizer.apply_gradients(zip(grads, trainable_vas))
         else:
             pass
 
@@ -143,6 +145,6 @@ except MyException as e:  # 画图
     plt.show()
 
     # 保存日志文件
-    data_m = [loss_history, acc_history, test_loss_history, test_acc_history]
-    txt_save(data_m, name='lines')
-    txt_save([y_pred, y_true], name='y_')
+    # data_m = [loss_history, acc_history, test_loss_history, test_acc_history]
+    # txt_save(data_m, name='lines')
+    # txt_save([y_pred, y_true], name='y_')
