@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+
 tf.enable_eager_execution()
 
 x = [[[0, 2.1],
@@ -20,7 +21,10 @@ a = [[[2, 2],
      [[3, 3],
       [3, 3]]]
 
-print(tf.multiply(x, a))
+# print(tf.multiply(x, a))
+weight = tf.get_variable('weight', shape=[10, 10],
+                         initializer=tf.keras.initializers.he_normal())
+print(weight)
 
 #
 # labels = [2, 1, 2, 1]
@@ -143,4 +147,3 @@ print(tf.multiply(x, a))
 #
 #     print('参数 w \n', linearc.trainable_variables)
 #
-

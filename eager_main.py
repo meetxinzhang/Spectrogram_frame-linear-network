@@ -13,10 +13,10 @@ tf.enable_eager_execution()
 # model
 height = 80
 width = 6
-move_stride = int(width - (width * 0.5))
+move_stride = int(width - (width * 0.25))
 depth = math.ceil((600 - width) / move_stride) + 1
 print('depth:{}, move_stride:{}'.format(depth, move_stride))
-rnn_units = 128
+rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
@@ -68,7 +68,6 @@ def cal_loss(logits, lab_batch):
 the_model = model.Model_X(rnn_units=rnn_units, num_class=num_class)
 optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001, momentum=0.8)
 trainable_vas = the_model.trainable_variables
-print('aaaaaaaa', trainable_vas)
 
 step = 1
 try:  # 捕获 input_data 在数据输送结束时的异常

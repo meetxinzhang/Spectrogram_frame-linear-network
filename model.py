@@ -2,7 +2,6 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
-import numpy as np
 from linear_conv_layer import LinerConv3DLayer
 
 
@@ -14,9 +13,9 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
-        self.lcl1 = LinerConv3DLayer(filters=8, kernel_size=[1, 3, 80, 6], activate_size=[3, 3, 3], activate_stride=[3, 1, 1])
-        self.lcl2 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 40, 3], activate_size=[3, 3, 3], activate_stride=[3, 1, 1])
-        self.lcl3 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 20, 2], activate_size=[3, 3, 2], activate_stride=[3, 1, 1])
+        self.lcl1 = LinerConv3DLayer(filters=8, kernel_size=[1, 3, 80, 6], activate_size=[3, 1, 3], activate_stride=[3, 1, 1])
+        self.lcl2 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 40, 3], activate_size=[3, 1, 3], activate_stride=[3, 1, 1])
+        self.lcl3 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 20, 2], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
 
         # 3DCNN
         # self.conv3d1 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 78, 6], strides=[1, 1, 6],
@@ -46,7 +45,7 @@ class Model_X(tf.keras.Model):
         self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
 
-        self.cell1 = tf.keras.layers.CuDNNGRU(units=80, return_sequences=True)
+        self.cell1 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True)
         self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)
 
         self.bn1 = tf.keras.layers.BatchNormalization()
@@ -77,7 +76,7 @@ class Model_X(tf.keras.Model):
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
         :param drop_rate: 0.3
-        :param inputs: [?, 1, 199, 80, 6]
+        :param inputs: [?, 1, 150, 80, 6]
         :return: logits
         """
         is_training = tf.equal(drop_rate, 0.3)
@@ -86,22 +85,21 @@ class Model_X(tf.keras.Model):
         sc1 = self.lcl1(inputs)
         # print('conv1: ', sc1.get_shape().as_list())
         sc1 = self.bn1(sc1, training=is_training)
-        pool1 = self.pooling1(sc1)  # (?, 32, 50, 40, 3)
+        pool1 = self.pooling1(sc1)  # (?, filters, 74, 40, 3)
         # print('pool1: ', pool1.get_shape().as_list())
 
         # conv2 = self.conv3d2(pool1)
         lc2 = self.lcl2(pool1)
         lc2 = self.bn2(lc2, training=is_training)
-        pool2 = self.pooling2(lc2)  # (?, 16, 25, 20, 2)
+        pool2 = self.pooling2(lc2)  # (?, filters, 36, 20, 2)
         # print('pool2: ', pool2.get_shape().as_list())
 
         # conv3 = self.conv3d3(pool2)
         lc3 = self.lcl3(pool2)
         lc3 = self.bn3(lc3, training=is_training)
-        pool3 = self.pooling3(lc3)  # (?, 8, 13, 10, 1)
+        pool3 = self.pooling3(lc3)  # (?, filters, 17, 10, 1)
         # pool3 = self.pooling_a(pool3)
-        pool3 = tf.squeeze(pool3, axis=-1)  # [?, 8, 13, 10]
-        import numpy
+        pool3 = tf.squeeze(pool3, axis=-1)  # [?, filters, 17, 10]
         # print('pool3: ', pool3.get_shape().as_list())
 
         # x_rnn = tf.squeeze(pool3, axis=2)  # (?, 8, 2, 10, 5)
@@ -111,8 +109,8 @@ class Model_X(tf.keras.Model):
         # if not is_training:
         #     self.draw_hid_features(inputs, pool3)
         ##################################################################
-        x_rnns = tf.unstack(pool3, axis=1)  # 展开通道维度  8*[?, 13, 10]
-        x_rnn = tf.concat(x_rnns, axis=2)  # 合并到列维度  [?, 13, 80]
+        x_rnns = tf.unstack(pool3, axis=1)  # 展开通道维度  filters*[?, 17, 10]
+        x_rnn = tf.concat(x_rnns, axis=2)  # 合并到列维度  [?, 17, filters*10=80]
 
         # x_rnn = tf.transpose(x_rnn, [0, 2, 1])  # [?, 10, 80]
 
