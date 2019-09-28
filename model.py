@@ -2,7 +2,7 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
-from linear_conv_layer import LinerConv3DLayer
+from linear_3d_layer import Linear3DLayer
 
 
 class Model_X(tf.keras.Model):
@@ -13,9 +13,16 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
-        self.lcl1 = LinerConv3DLayer(filters=8, kernel_size=[1, 3, 80, 6], activate_size=[3, 1, 3], activate_stride=[3, 1, 1])
-        self.lcl2 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 40, 3], activate_size=[3, 1, 3], activate_stride=[3, 1, 1])
-        self.lcl3 = LinerConv3DLayer(filters=8, kernel_size=[8, 3, 20, 2], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 80, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 40, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 20, 2], activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
+
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 1], strides=[2, 2, 1], padding='same',
+                                                  data_format='channels_first')
+        self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+                                                  data_format='channels_first')
+        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
+                                                  data_format='channels_first')
 
         # 3DCNN
         # self.conv3d1 = tf.keras.layers.Conv3D(filters=32, kernel_size=[3, 78, 6], strides=[1, 1, 6],
@@ -24,8 +31,6 @@ class Model_X(tf.keras.Model):
         #                                       kernel_initializer=tf.keras.initializers.he_normal(),
         #                                       bias_initializer=tf.zeros_initializer(),
         #                                       data_format='channels_first')
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
-                                                  data_format='channels_first')
 
         # self.conv3d2 = tf.keras.layers.Conv3D(filters=16, kernel_size=[3, 38, 3], strides=[1, 1, 3],
         #                                       use_bias=True,
@@ -33,8 +38,6 @@ class Model_X(tf.keras.Model):
         #                                       kernel_initializer=tf.keras.initializers.he_normal(),
         #                                       bias_initializer=tf.zeros_initializer(),
         #                                       data_format='channels_first')
-        self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
-                                                  data_format='channels_first')
 
         # self.conv3d3 = tf.keras.layers.Conv3D(filters=8, kernel_size=[3, 19, 2], strides=[1, 1, 2],
         #                                       use_bias=True,
@@ -42,8 +45,6 @@ class Model_X(tf.keras.Model):
         #                                       kernel_initializer=tf.keras.initializers.he_normal(),
         #                                       bias_initializer=tf.zeros_initializer(),
         #                                       data_format='channels_first')
-        self.pooling3 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
-                                                  data_format='channels_first')
 
         self.cell1 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True)
         self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)

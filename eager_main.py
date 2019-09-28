@@ -12,7 +12,7 @@ tf.enable_eager_execution()
 
 # model
 height = 80
-width = 6
+width = 4
 move_stride = int(width - (width * 0.25))
 depth = math.ceil((600 - width) / move_stride) + 1
 print('depth:{}, move_stride:{}'.format(depth, move_stride))
