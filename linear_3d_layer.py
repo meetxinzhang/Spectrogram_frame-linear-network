@@ -47,7 +47,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
         :param w_tiled_slice: [bs, c, d, h, w]
         :return: [bs, c, d, h, w]
         """
-        for i in range(self.margin):
+        for i in range(self.margin+1):
             h_slice = tf.slice(d_slice, [0, 0, 0, i, 0], [-1, -1, -1, self.h, -1])
             b_tiled_slice = tf.multiply(h_slice, w_tiled_slice) + b_tiled_slice
 
@@ -61,7 +61,8 @@ class Linear3DLayer(tf.keras.layers.Layer):
         :return: features_map has a same shape to inputs
         """
         [batch_size, channel, depth, height, _] = np.shape(inputs)
-        assert channel == self.c & height > self.h
+        assert channel == self.c
+        assert height > self.h
 
         self.margin = height-self.h
 

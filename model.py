@@ -2,6 +2,7 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
+import numpy as np
 from linear_3d_layer import Linear3DLayer
 
 
@@ -13,9 +14,9 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
-        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 80, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 40, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 20, 2], activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
+        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 78, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 37, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 17, 2], activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
 
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 1], strides=[2, 2, 1], padding='same',
                                                   data_format='channels_first')
@@ -77,30 +78,31 @@ class Model_X(tf.keras.Model):
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
         :param drop_rate: 0.3
-        :param inputs: [?, 1, 150, 80, 6]
+        :param inputs: [?, 1, 200, 80, 4]
         :return: logits
         """
         is_training = tf.equal(drop_rate, 0.3)
+        # print('inputs ', np.shape(inputs))
 
         # conv1 = self.conv3d1(inputs)
-        sc1 = self.lcl1(inputs)
+        lc1 = self.lcl1(inputs)
         # print('conv1: ', sc1.get_shape().as_list())
-        sc1 = self.bn1(sc1, training=is_training)
-        pool1 = self.pooling1(sc1)  # (?, filters, 74, 40, 3)
+        lc1 = self.bn1(lc1, training=is_training)
+        pool1 = self.pooling1(lc1)  # (?, filters, 99, 39, 4)
         # print('pool1: ', pool1.get_shape().as_list())
 
         # conv2 = self.conv3d2(pool1)
         lc2 = self.lcl2(pool1)
         lc2 = self.bn2(lc2, training=is_training)
-        pool2 = self.pooling2(lc2)  # (?, filters, 36, 20, 2)
+        pool2 = self.pooling2(lc2)  # (?, filters, 49, 19, 2)
         # print('pool2: ', pool2.get_shape().as_list())
 
         # conv3 = self.conv3d3(pool2)
         lc3 = self.lcl3(pool2)
         lc3 = self.bn3(lc3, training=is_training)
-        pool3 = self.pooling3(lc3)  # (?, filters, 17, 10, 1)
+        pool3 = self.pooling3(lc3)  # (?, filters, 24, 9, 1)
         # pool3 = self.pooling_a(pool3)
-        pool3 = tf.squeeze(pool3, axis=-1)  # [?, filters, 17, 10]
+        pool3 = tf.squeeze(pool3, axis=-1)  # [?, filters, 24, 9]
         # print('pool3: ', pool3.get_shape().as_list())
 
         # x_rnn = tf.squeeze(pool3, axis=2)  # (?, 8, 2, 10, 5)
