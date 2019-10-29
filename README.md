@@ -1,5 +1,7 @@
 X 计划 
 
+论文已发表(https://doi.org/10.1016/j.ecoinf.2019.101009)，本项目开源；
+
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
 基于 TensorFlow 
