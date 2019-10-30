@@ -1,6 +1,10 @@
 X 计划 
 
-论文已发表 https://doi.org/10.1016/j.ecoinf.2019.101009 本项目开源；
+论文已发表 https://doi.org/10.1016/j.ecoinf.2019.101009 ， 使用本项目中的方法请引用；
+
+本项目受到开源协议保护 Apache License Version 2.0, January 2004 http://www.apache.org/licenses/
+
+使用本代码必须遵循协议规范，注明出处；
 
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
