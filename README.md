@@ -19,15 +19,19 @@ X 计划
 - 模块化设计，可根据文件计数器加入动态代理；
 
 一系列音频数据预处理过程
-- 梅尔频谱图转换
-- 图像标准化
-- 3D图像帧序列构建
+- 从MP3到梅尔频谱图的转换
+- 图像标准化，数据增强
+- continuous frame sequence 的构建
 - 自动化的 batch 生成器
 
 一个音频识别神经网络
 - 以上述3D图像帧序列为输入
-- 为音频特殊设计的线性层
+- 为音频特殊设计的 Spectrogram-frame linear layer
 - 一系列结果分析以及可视化方法
 
 
-
+Highlights
+- Continuous frame sequence as a dynamic visual representation of the bird sound;
+- Spectrogram-frame linear network emphasizes the changes of bird sound in time domain and frequency domain;
+- The shorter the frame length and frame shift of continuous frame sequence, and the better the classification effect of SFLN;
+- The method achieves excellent classification effects and has good robustness in complex backgrounds.
