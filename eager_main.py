@@ -20,7 +20,7 @@ rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
-batch_size = 16
+batch_size = 32
 epoch = 4  # 训练的 epoch 数，从1开始计数
 display_step = 1
 

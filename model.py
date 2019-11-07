@@ -14,9 +14,12 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
-        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 78, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 37, 4], activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 17, 2], activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
+        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 75, 4],
+                                  activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 34, 4],
+                                  activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 16, 2],
+                                  activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
 
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 1], strides=[2, 2, 1], padding='same',
                                                   data_format='channels_first')
@@ -66,14 +69,6 @@ class Model_X(tf.keras.Model):
         # self.fc2 = tf.keras.layers.Dense(units=num_class, use_bias=True, activation=None,
         #                                  kernel_initializer=tf.keras.initializers.he_normal(),
         #                                  bias_initializer=tf.constant_initializer)
-
-    def linear_conv_layer(self, x):
-        """
-        :param x: [?, c, d, f, t]
-        :return:
-        """
-
-        return None
 
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """

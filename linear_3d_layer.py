@@ -9,14 +9,14 @@ class Linear3DLayer(tf.keras.layers.Layer):
         过滤器只在连续帧的时间维度上移动，适合处理时序数据（视频，音频等）
         参数个数： filters * kernel_size
         :param filters: 过滤器的个数
-        :param cache: 上下缓冲区宽度
+        :param margin: 上下缓冲区宽度
         :param kernel_size: 过滤器的大小，维度说明： [上一层通道数，连续帧深度，单帧高，单帧宽]
         :param activate_size: 在过滤器上的激活窗口大小，维度说明： [连续帧深度，单帧高，单帧宽]
         :param activate_stride: 在过滤器上的激活窗口移动步长，维度说明： [连续帧深度，单帧高，单帧宽]
         """
         super(Linear3DLayer, self).__init__()
         self.filters = filters
-        self.margin = 0
+        self.margin = 0  # self.margin = height-self.h
         [self.c, self.d, self.h, self.w] = kernel_size
 
         self.weight = tf.get_variable('weight', shape=[self.filters, 1, self.c, self.d, self.h, self.w],
