@@ -2,7 +2,6 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
-import numpy as np
 from linear_3d_layer import Linear3DLayer
 
 
@@ -14,14 +13,14 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
-        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 75, 4],
+        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 75, 6],
                                   activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 34, 4],
+        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 36, 3],
                                   activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 16, 2],
+        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 17, 2],
                                   activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
 
-        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 1], strides=[2, 2, 1], padding='same',
+        self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')

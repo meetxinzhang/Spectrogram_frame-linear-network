@@ -93,7 +93,8 @@ class input_data(object):
                 imagePath = self.test_fnames[self.file_point]
             try:
                 # list.shape=[11, 80, 200] 这里可以换成其他任何读取单个样本的数据
-                features = build_3d_input.get_features_3dmat(imagePath, window_size=self.width, move_stride=self.move_stride, depth=self.depth)
+                features = build_3d_input.get_features_3dmat(imagePath, window_size=self.width,
+                                                             move_stride=self.move_stride, depth=self.depth)
             except EOFError:
                 print('EOFError', imagePath)
                 self.file_point += 1
