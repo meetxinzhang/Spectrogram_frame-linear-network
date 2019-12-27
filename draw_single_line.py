@@ -1,7 +1,7 @@
 # coding: utf-8
 # ---
 # @File: draw_single_line.py
-# @description: 用 matplotlib 画折线图，从读取 tensorboard 保存的数据
+# @description: 用 matplotlib 画折线图，从读取 tensorboard 保存的数据，其在 eager_main 中保存
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 6月10, 2019

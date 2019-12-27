@@ -1,7 +1,7 @@
 # coding: utf-8
 # ---
 # @File: build_3d_input.py
-# @description: 用于构建3D连续帧序列，在 input_data.py 中被调用
+# @description: 用于构建3D连续帧序列(详见论文)，在 input_data.py 中被调用
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 3月18, 2019
@@ -135,8 +135,8 @@ def get_features_3dmat(fileneme, window_size, move_stride, depth):
     # logspec = librosa.amplitude_to_db(mel)
     #
     # logspec = np.asarray(scipy.misc.toimage(logspec))
-    logspec = np.asarray(Image.open(fileneme))
 
+    logspec = np.asarray(Image.open(fileneme))
     features3d = stack_features(logspec, window_size=window_size, move_stride=move_stride, depth=depth)
 
     # len_feat = len(features3d)
@@ -148,6 +148,13 @@ def get_features_3dmat(fileneme, window_size, move_stride, depth):
 
 
 def windows(row, window_size, move_stride):
+    """
+    滑动窗口
+    :param row: 图像矩阵总的列数
+    :param window_size: 窗口长，即所覆盖的列数
+    :param move_stride: 窗口移动步长
+    :return: 窗口的开始和结束位置（列索引）
+    """
     start = 0
     while start + window_size <= row:
         yield start, start + window_size
@@ -155,6 +162,14 @@ def windows(row, window_size, move_stride):
 
 
 def stack_features(mat, window_size=200, move_stride=100, depth=7):
+    """
+    连续帧堆栈
+    :param mat: 原图像矩阵80*600
+    :param window_size: 窗口长，即所覆盖的列数
+    :param move_stride: 窗口移动步长
+    :param depth: 连续帧的帧数
+    :return: 三维矩阵 depth*80*？
+    """
     features3d = []
 
     row = np.shape(mat)[1]

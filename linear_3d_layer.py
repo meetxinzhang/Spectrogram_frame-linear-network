@@ -44,7 +44,8 @@ class Linear3DLayer(tf.keras.layers.Layer):
 
     def __multi_granularity_activate_on_kernel__(self, inputs):
         """
-        tf 的卷积函数，这部分参数固定为1，不参与训练，只是为了利用卷积运算的功能，在过滤器的3x3块上进行多粒度扫描，应用激活函数，并合并通道
+        分块激活，详见论文
+        应用了 tf 的卷积函数，这部分参数固定为1，不参与训练，只是为了利用卷积运算的功能，在过滤器的3x3块上进行多粒度扫描，应用激活函数，并合并通道
         :param inputs: [?, c, 3, h, w]
         :return: [?, c, 1, h, w]
         """
@@ -54,7 +55,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
 
     def __margin_multiply__(self, d_slice, w_tiled_slice, b_tiled_slice):
         """
-        缓冲区机制，详见论文
+        加权，加偏置量，类似于卷积网络里的 y = wx+b，但有不同：一是这并非卷积运算，二是设置了一个缓冲区机制，详见论文
         :param d_slice: [bs, c, d, h, w]
         :param w_tiled_slice: [bs, c, d, h, w]
         :return: [bs, c, d, h, w]
@@ -76,18 +77,21 @@ class Linear3DLayer(tf.keras.layers.Layer):
         assert channel == self.c
         assert height > self.h
 
+        # 缓冲区机制，详见论文
         self.margin = height-self.h
 
         inputs = tf.cast(inputs, tf.float32)
 
+        # 平铺 batch_size 个 权重和偏置
         w_tiled = tf.tile(self.weight, [1, batch_size, 1, 1, 1, 1], name="w_tiled")  # [f, bs, c, d, h, w]
         b_tiled = tf.tile(self.bias, [1, batch_size, 1, 1, 1, 1], name="b_tiled")  # [f, bs, c, d, h, w]
 
         features_map = tf.zeros(shape=[batch_size, self.filters, 0, self.h, self.w])
 
-        # 逐帧扫描
+        # 对连续帧序列，进行逐帧扫描
         for i in range(depth):
             try:
+                # 截取连续的 self.d 帧
                 d_slice = tf.slice(inputs, [0, 0, i, 0, 0], [-1, -1, self.d, -1, -1])  # [bs, c, d, h, w]
             except tf.errors.InvalidArgumentError:
                 # 到达了序列末尾
@@ -98,6 +102,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
 
             slice_map = tf.zeros(shape=[batch_size, 0, 1, self.h, self.w])
 
+            # 为节省内存，只好分过滤器进行计算，电脑内存大的可以去掉这个循环
             for f in range(self.filters):
                 w_tiled_slice = w_tiled[f]
                 b_tiled_slice = b_tiled[f]
@@ -109,7 +114,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
 
             features_map = tf.concat([features_map, slice_map], axis=2)  # 组合为多帧（完整的）特征图
 
-            # 释放内存
+            # 释放内存，好像没什么屁用
             d_slice = None
             slice_map = None
             a = None

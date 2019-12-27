@@ -1,7 +1,7 @@
 # coding: utf-8
 # ---
 # @File: draw_many_line.py
-# @description: 用 matplotlib 在一幅图上绘多条折线，从读取 tensorboard 保存的数据
+# @description: 用 matplotlib 在一幅图上绘多条折线，从读取 tensorboard 保存的数据，其在 eager_main 中保存
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 1月11, 2019

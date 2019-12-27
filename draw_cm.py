@@ -1,7 +1,7 @@
 # coding: utf-8
 # ---
 # @File: draw_cm.py
-# @description: 混淆矩阵分析, 从txt文件中获得实验日志数据
+# @description: 混淆矩阵分析, 从txt文件中获得实验日志数据，其在 eager_main 中保存
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 6月27, 2019

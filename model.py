@@ -25,6 +25,7 @@ class Model_X(tf.keras.Model):
         self.num_class = num_class
         self.i = 0
 
+        # 线性层
         self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 75, 6],
                                   activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
         self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 36, 3],
@@ -32,6 +33,7 @@ class Model_X(tf.keras.Model):
         self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 17, 2],
                                   activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
 
+        # 池化层
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
                                                   data_format='channels_first')
         self.pooling2 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',
@@ -61,9 +63,11 @@ class Model_X(tf.keras.Model):
         #                                       bias_initializer=tf.zeros_initializer(),
         #                                       data_format='channels_first')
 
+        # GRU 网络
         self.cell1 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True)
         self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)
 
+        # BatchNormal
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.bn3 = tf.keras.layers.BatchNormalization()
@@ -83,8 +87,7 @@ class Model_X(tf.keras.Model):
 
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
-        组织了三层时频帧线性层，两层GRU，然后输出GRU的最后一个时间状态作为logits
-        其中串联了 BatchNormalization
+        组织了三层时频帧线性层，两层GRU，然后输出GRU的最后一个时间状态作为logits，其中串联了 BatchNormal
         :param drop_rate: Dropout的比例=0.3，这个超参数没用到
         :param inputs: [?, 1, 200, 80, 4]
         :return: logits
@@ -114,8 +117,9 @@ class Model_X(tf.keras.Model):
         # x_rnns = tf.unstack(pool3, axis=2)  # 展开帧维度  2*[?, 8, 10, 5]
         # x_rnn = tf.concat(x_rnns, axis=3)  # 合并到行维度  [?, 8, 10, 10]
 
-        # if not is_training:
-        #     self.draw_hid_features(inputs, pool3)
+        if not is_training:
+            # self.draw_hid_features(inputs, pool3)
+            pass
         ##################################################################
         x_rnns = tf.unstack(pool3, axis=1)  # 展开通道维度  filters*[?, 17, 10]
         x_rnn = tf.concat(x_rnns, axis=2)  # 合并到列维度  [?, 17, filters*10=80]
@@ -169,7 +173,7 @@ class Model_X(tf.keras.Model):
 
     def draw_hid_features(self, inputs, batch):
         """
-        绘制中间层的特征图，保存在本地/hid_pic，第117-118行调用
+        绘制中间层的特征图，保存在本地/hid_pic，第120-121行调用
         :param inputs: [?, 1, 100, 80, 6]
         :param batch: [?, 8, 13, 10]
         """
