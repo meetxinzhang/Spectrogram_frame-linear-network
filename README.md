@@ -28,3 +28,13 @@ X 计划
 - 以上述3D图像帧序列为输入
 - 为音频特殊设计的 Spectrogram-frame linear layer
 - 一系列结果分析以及可视化方法
+
+
+环境配置：
+- Tensorflow 1.14以上，需要eager模式支持
+- librosa，音频处理
+- PIL，图像处理
+- scipy，图像处理
+- matplotlib，绘图
+- sklearn，需要用到一些结果分析函数
+

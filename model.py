@@ -1,3 +1,13 @@
+# coding: utf-8
+# ---
+# @File: model.py
+# @description: 模型类
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 3月18, 2019
+# ---
+
+
 import tensorflow as tf
 from PIL import Image
 import scipy.misc
@@ -6,7 +16,9 @@ from linear_3d_layer import Linear3DLayer
 
 
 class Model_X(tf.keras.Model):
-
+    """
+    继承自基类 tf.keras.Model
+    """
     def __init__(self, rnn_units, num_class):
         super(Model_X, self).__init__()
         self.rnn_units = rnn_units
@@ -71,27 +83,26 @@ class Model_X(tf.keras.Model):
 
     def call(self, inputs, drop_rate=0.3, **kwargs):
         """
-        :param drop_rate: 0.3
+        组织了三层时频帧线性层，两层GRU，然后输出GRU的最后一个时间状态作为logits
+        其中串联了 BatchNormalization
+        :param drop_rate: Dropout的比例=0.3，这个超参数没用到
         :param inputs: [?, 1, 200, 80, 4]
         :return: logits
         """
         is_training = tf.equal(drop_rate, 0.3)
         # print('inputs ', np.shape(inputs))
 
-        # conv1 = self.conv3d1(inputs)
         lc1 = self.lcl1(inputs)
         # print('conv1: ', sc1.get_shape().as_list())
         lc1 = self.bn1(lc1, training=is_training)
         pool1 = self.pooling1(lc1)  # (?, filters, 99, 39, 4)
         # print('pool1: ', pool1.get_shape().as_list())
 
-        # conv2 = self.conv3d2(pool1)
         lc2 = self.lcl2(pool1)
         lc2 = self.bn2(lc2, training=is_training)
         pool2 = self.pooling2(lc2)  # (?, filters, 49, 19, 2)
         # print('pool2: ', pool2.get_shape().as_list())
 
-        # conv3 = self.conv3d3(pool2)
         lc3 = self.lcl3(pool2)
         lc3 = self.bn3(lc3, training=is_training)
         pool3 = self.pooling3(lc3)  # (?, filters, 24, 9, 1)
@@ -158,9 +169,9 @@ class Model_X(tf.keras.Model):
 
     def draw_hid_features(self, inputs, batch):
         """
+        绘制中间层的特征图，保存在本地/hid_pic，第117-118行调用
         :param inputs: [?, 1, 100, 80, 6]
         :param batch: [?, 8, 13, 10]
-        :return: 画图
         """
         import numpy
         inputs = numpy.squeeze(inputs)  # [?, 100, 80, 6]

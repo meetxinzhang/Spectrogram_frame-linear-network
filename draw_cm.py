@@ -1,6 +1,12 @@
-"""
-混淆矩阵分析
-"""
+# coding: utf-8
+# ---
+# @File: draw_cm.py
+# @description: 混淆矩阵分析, 从txt文件中获得实验日志数据
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 6月27, 2019
+# ---
+
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt

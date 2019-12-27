@@ -1,8 +1,18 @@
+# coding: utf-8
+# ---
+# @File: draw_many_line.py
+# @description: 用 matplotlib 在一幅图上绘多条折线，从读取 tensorboard 保存的数据
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 1月11, 2019
+# ---
+
 from tensorboard.backend.event_processing import event_accumulator
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.rcParams['font.size'] = 18
 matplotlib.rcParams['font.family'] = 'Times New Roman'
+
 
 # 加载tensorboard日志数据
 ea_09 = event_accumulator.EventAccumulator('tensor_logs/over09_f/test/events.out.tfevents.1556093081.localhost.localdomain')

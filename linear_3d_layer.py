@@ -1,3 +1,13 @@
+# coding: utf-8
+# ---
+# @File: input_data.py
+# @description: 时频帧线性层，计算原理是线性卷积，在 model.py 中被调用
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 9月5, 2019
+# ---
+
+
 import tensorflow as tf
 import numpy as np
 
@@ -5,6 +15,7 @@ import numpy as np
 class Linear3DLayer(tf.keras.layers.Layer):
     def __init__(self, filters, kernel_size, activate_size, activate_stride):
         """
+        继承自基类 tf.keras.layers.Layer
         该层我起名叫时频帧线性层，其中特殊构造的过滤器类似于在流水线上工作的工人（论文中我说是像一个带通滤波器 band-pass filter），
         过滤器只在连续帧的时间维度上移动，适合处理时序数据（视频，音频等）
         参数个数： filters * kernel_size
@@ -31,7 +42,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
                                              name='activate_conv',
                                              trainable=False)
 
-    def __multi_granularity_activate__on_kernel__(self, inputs):
+    def __multi_granularity_activate_on_kernel__(self, inputs):
         """
         tf 的卷积函数，这部分参数固定为1，不参与训练，只是为了利用卷积运算的功能，在过滤器的3x3块上进行多粒度扫描，应用激活函数，并合并通道
         :param inputs: [?, c, 3, h, w]
@@ -43,6 +54,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
 
     def __margin_multiply__(self, d_slice, w_tiled_slice, b_tiled_slice):
         """
+        缓冲区机制，详见论文
         :param d_slice: [bs, c, d, h, w]
         :param w_tiled_slice: [bs, c, d, h, w]
         :return: [bs, c, d, h, w]

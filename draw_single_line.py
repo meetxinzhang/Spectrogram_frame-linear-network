@@ -1,3 +1,12 @@
+# coding: utf-8
+# ---
+# @File: draw_single_line.py
+# @description: 用 matplotlib 画折线图，从读取 tensorboard 保存的数据
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 6月10, 2019
+# ---
+
 from tensorboard.backend.event_processing import event_accumulator
 import matplotlib.pyplot as plt
 import matplotlib

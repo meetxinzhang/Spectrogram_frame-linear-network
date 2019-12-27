@@ -1,3 +1,12 @@
+# coding: utf-8
+# ---
+# @File: bl_data.py
+# @description: baseline 对比实验的数据生成类
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 2月26, 2019
+# ---
+
 import os
 import numpy as np
 from PIL import Image

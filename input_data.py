@@ -1,3 +1,13 @@
+# coding: utf-8
+# ---
+# @File: input_data.py
+# @description: 数据发动机，从本地文件夹生成 batch，自驱动，自停止，训练完自动切换测试，
+#   在 eager_main.py 中被调用，只需调用 next_batch 方法
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 3月18, 2019
+# ---
+
 import os
 import numpy as np
 import build_3d_input
@@ -10,8 +20,8 @@ class input_data(object):
     def __init__(self, file_dir, width=200, move_stride=100, depth=10, num_class=4):
         self.file_dir = file_dir
         self.training = True
-        self.epoch_index = 1  # epoch次数指针，训练从1开始
-        self.file_point = 0  # 第0个epoch表示测试集
+        self.epoch_index = 1  # epoch 次数指针，训练从1开始计数，训练数据输送完会指0，开始输送测试数据，next_batch方法会给调用者返回这个值
+        self.file_point = 0  # 文件指针
 
         self.depth = depth
         self.width = width
@@ -22,6 +32,11 @@ class input_data(object):
             = self.get_filenames(self.file_dir)
 
     def get_filenames(self, file_dir):
+        """
+        遍历全部本地文件名，赋标签；随机打乱顺序；按0.3的比例划分出测试集
+        :param file_dir: 文件根目录
+        :return: 四个list
+        """
         filenames = []
         labels = []
 
@@ -55,6 +70,12 @@ class input_data(object):
         return train_fnames, train_labs, test_fnames, test_labs
 
     def next_batch(self, batch_size, epoch=1):
+        """
+        获取下一批次（训练或测试）数据
+        :param batch_size: 批次大小
+        :param epoch: 批次索引
+        :return: 数据numpy数组，标签numpy数组，和批次索引
+        """
 
         if self.training:
             max = len(self.train_fnames)

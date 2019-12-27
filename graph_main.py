@@ -1,4 +1,11 @@
-# coding=utf-8
+# coding: utf-8
+# ---
+# @File: graph_main.py
+# @description: 主函数，使用 tensorflow graph 模式，废弃不用了
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 3月18, 2019
+# ---
 import tensorflow as tf
 import model
 import time

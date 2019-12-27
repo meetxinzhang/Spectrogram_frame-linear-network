@@ -1,3 +1,13 @@
+# coding: utf-8
+# ---
+# @File: bl_model.py
+# @description: baseline 对比实验的模型类
+# @Author: Xin Zhang
+# @E-mail: meetdevin.zh@outlook.com
+# @Time: 2月26, 2019
+# ---
+
+
 import tensorflow as tf
 import numpy as np
 import bl_data
