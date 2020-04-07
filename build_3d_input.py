@@ -7,7 +7,7 @@
 # @Time: 3月18, 2019
 # ---
 
-import librosa.display
+# import librosa.display
 from MyException import MyException
 import numpy as np
 from PIL import Image

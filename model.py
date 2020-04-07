@@ -64,8 +64,8 @@ class Model_X(tf.keras.Model):
         #                                       data_format='channels_first')
 
         # GRU 网络
-        self.cell1 = tf.keras.layers.CuDNNGRU(units=self.rnn_units, return_sequences=True)
-        self.cell2 = tf.keras.layers.CuDNNGRU(units=self.num_class)
+        self.cell1 = tf.keras.layers.GRU(units=self.rnn_units, return_sequences=True)
+        self.cell2 = tf.keras.layers.GRU(units=self.num_class)
 
         # BatchNormal
         self.bn1 = tf.keras.layers.BatchNormalization()

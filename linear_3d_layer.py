@@ -30,10 +30,14 @@ class Linear3DLayer(tf.keras.layers.Layer):
         self.margin = 0  # self.margin = height-self.h
         [self.c, self.d, self.h, self.w] = kernel_size
 
-        self.weight = tf.get_variable('weight', shape=[self.filters, 1, self.c, self.d, self.h, self.w],
-                                      initializer=tf.keras.initializers.he_normal())
-        self.bias = tf.get_variable('bias', shape=[self.filters, 1, self.c, self.d, self.h, self.w],
-                                    initializer=tf.keras.initializers.he_normal())
+        # self.weight = tf.Variable('weight', shape=[self.filters, 1, self.c, self.d, self.h, self.w],
+        #                           initializer=tf.keras.initializers.he_normal())
+        self.weight = tf.Variable(tf.initializers.he_normal()(shape=[self.filters, 1, self.c, self.d, self.h, self.w]))
+
+        self.bias = tf.Variable(tf.initializers.he_normal()(shape=[self.filters, 1, self.c, self.d, self.h, self.w]))
+
+        # self.bias = tf.Variable('bias', shape=[self.filters, 1, self.c, self.d, self.h, self.w],
+        #                         initializer=tf.keras.initializers.he_normal())
         self.conv3d = tf.keras.layers.Conv3D(filters=1, kernel_size=activate_size, strides=activate_stride,
                                              use_bias=False,
                                              activation=tf.nn.leaky_relu, padding='same',
@@ -60,11 +64,11 @@ class Linear3DLayer(tf.keras.layers.Layer):
         :param w_tiled_slice: [bs, c, d, h, w]
         :return: [bs, c, d, h, w]
         """
-        for i in range(self.margin+1):
+        for i in range(self.margin + 1):
             h_slice = tf.slice(d_slice, [0, 0, 0, i, 0], [-1, -1, -1, self.h, -1])
             b_tiled_slice = tf.multiply(h_slice, w_tiled_slice) + b_tiled_slice
 
-        return tf.multiply(b_tiled_slice, 1/4)
+        return tf.multiply(b_tiled_slice, 1 / 4)
 
     def call(self, inputs, training=None, mask=None):
         """
@@ -78,7 +82,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
         assert height > self.h
 
         # 缓冲区机制，详见论文
-        self.margin = height-self.h
+        self.margin = height - self.h
 
         inputs = tf.cast(inputs, tf.float32)
 
@@ -108,7 +112,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
                 b_tiled_slice = b_tiled[f]
 
                 a = self.__margin_multiply__(d_slice, w_tiled_slice, b_tiled_slice)  # [bs, c, d, h, w]
-                b = self.__multi_granularity_activate__on_kernel__(a)  # 利用卷积层合并通道 [bs, 1?, 1, h, w]
+                b = self.__multi_granularity_activate_on_kernel__(a)  # 利用卷积层合并通道 [bs, 1?, 1, h, w]
 
                 slice_map = tf.concat([slice_map, b], axis=1)  # 组合为多通道 区块特征图 [bs, filter, 1, h, w]
 

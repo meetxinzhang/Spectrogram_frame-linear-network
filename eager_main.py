@@ -16,7 +16,7 @@ from MyException import MyException
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.rcParams['font.size'] = 18
-tf.enable_eager_execution()
+# tf.enable_eager_execution()
 
 # model
 height = 80
@@ -28,7 +28,7 @@ rnn_units = 64
 drop_rate = 0.3
 num_class = 4
 
-batch_size = 16
+batch_size = 8
 epoch = 4  # 训练的 epoch 数，从1开始计数
 display_step = 1
 
@@ -68,7 +68,7 @@ def txt_save(data_m, name):
 
 
 # 初始化 input_data 类的对象
-fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
+fuckdata = input_data.input_data(file_dir='E:/数据集/sounds_data/new_images',
                                  width=width, move_stride=move_stride, depth=depth, num_class=num_class)
 
 
@@ -94,9 +94,10 @@ def cal_loss(logits, lab_batch):
 
 # 初始化模型和优化器
 the_model = model.Model_X(rnn_units=rnn_units, num_class=num_class)
-optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0008, momentum=0.7)
+optimizer = tf.optimizers.RMSprop(learning_rate=0.0008, momentum=0.7)
 # 获取模型中可训练的参数
 trainable_vas = the_model.trainable_variables
+print('trainable_vas', len(trainable_vas))
 
 step = 1  # 训练step，一个 step 处理一个 batch 的数据
 try:
