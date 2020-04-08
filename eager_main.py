@@ -96,8 +96,8 @@ def cal_loss(logits, lab_batch):
 the_model = model.Model_X(rnn_units=rnn_units, num_class=num_class)
 optimizer = tf.optimizers.RMSprop(learning_rate=0.0008, momentum=0.7)
 # 获取模型中可训练的参数
-trainable_vas = the_model.trainable_variables
-print('trainable_vas', len(trainable_vas))
+# trainable_vas = the_model.trainable_variables
+# print('trainable_vas', len(trainable_vas))
 
 step = 1  # 训练step，一个 step 处理一个 batch 的数据
 try:
@@ -116,8 +116,8 @@ try:
 
         # 如果为训练阶段，则应用梯度下降，让模型学习；测试阶段什么都不做
         if epoch_index != 0:
-            grads = tape.gradient(loss, trainable_vas)
-            optimizer.apply_gradients(zip(grads, trainable_vas))
+            grads = tape.gradient(loss, the_model.trainable_variables)
+            optimizer.apply_gradients(zip(grads, the_model.trainable_variables))
         else:
             pass
 
