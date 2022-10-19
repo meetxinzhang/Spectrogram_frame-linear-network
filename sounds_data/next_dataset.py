@@ -1,6 +1,6 @@
 # coding: utf-8
 # ---
-# @File: next_batch.py
+# @File: next_dataset.py
 # @description: 数据发动机，从本地文件夹生成 batch，自驱动，自停止，训练完自动切换测试，
 #   在 main_eager.py 中被调用，只需调用 next_batch 方法
 # @Author: Xin Zhang
@@ -28,22 +28,21 @@ class BatchLoader(object):
         self.move_stride = move_stride
         self.num_class = num_class  # 数据集的类别数
 
-        self.train_fnames, self.train_labs, self.test_fnames, self.test_labs\
-            = self.get_filenames(self.file_dir)
+        self.train_fns, self.train_labs, self.test_fns, self.test_labs\
+            = self.get_filenames()
 
-    def get_filenames(self, file_dir):
+    def get_filenames(self):
         """
         遍历全部本地文件名，赋标签；随机打乱顺序；按0.3的比例划分出测试集
-        :param file_dir: 文件根目录
         :return: 四个list
         """
         filenames = []
         labels = []
 
-        for train_class in os.listdir(file_dir):
-            for pic in os.listdir(file_dir + '/' + train_class):
-                if os.path.isfile(file_dir + '/' + train_class + '/' + pic):
-                    filenames.append(file_dir + '/' + train_class + '/' + pic)
+        for train_class in os.listdir(self.file_dir):
+            for pic in os.listdir(self.file_dir + '/' + train_class):
+                if os.path.isfile(self.file_dir + '/' + train_class + '/' + pic):
+                    filenames.append(self.file_dir + '/' + train_class + '/' + pic)
                     label = class_names.index(train_class)
                     labels.append(int(label))
 
@@ -78,9 +77,9 @@ class BatchLoader(object):
         """
 
         if self.training:
-            max = len(self.train_fnames)
+            max = len(self.train_fns)
         else:
-            max = len(self.test_fnames)
+            max = len(self.test_fns)
 
         if self.file_point == max:
             if not self.training:
@@ -95,7 +94,7 @@ class BatchLoader(object):
             # 当完成了 epoch 次重复训练，epoch_index置为0，进入测试阶段
             self.epoch_index = 0  # 第0个epoch表示测试集
             self.file_point = 0
-            max = len(self.test_fnames)
+            max = len(self.test_fns)
             self.training = False
             print('######################### 测试')
 
@@ -113,9 +112,9 @@ class BatchLoader(object):
         while self.file_point < end and self.file_point < max:
             # 遍历数据，从 file_point 开始，到 end 结束
             if self.training:
-                imagePath = self.train_fnames[self.file_point]
+                imagePath = self.train_fns[self.file_point]
             else:
-                imagePath = self.test_fnames[self.file_point]
+                imagePath = self.test_fns[self.file_point]
             try:
                 # list.shape=[11, 80, 200] 这里可以换成其他任何读取单个样本的数据
                 features = build_3d_input.get_features_3dmat(imagePath, window_size=self.width,

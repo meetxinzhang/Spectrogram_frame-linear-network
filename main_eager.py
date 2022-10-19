@@ -9,6 +9,7 @@
 
 import tensorflow as tf
 from SFLN import model
+from sounds_data.next_dataset import BatchLoader
 import math
 import time
 from utils.MyException import MyException
@@ -67,8 +68,8 @@ def txt_save(data_m, name):
 
 
 # 初始化 input_data 类的对象
-fuckdata = input_data.BatchLoader(file_dir='E:/数据集/sounds_data/new_images',
-                                  width=width, move_stride=move_stride, depth=depth, num_class=num_class)
+loader = BatchLoader(file_dir='E:/数据集/sounds_data/new_images',
+                     width=width, move_stride=move_stride, depth=depth, num_class=num_class)
 
 
 def my_learning_rate(epoch_index, step):
@@ -100,8 +101,8 @@ optimizer = tf.optimizers.RMSprop(learning_rate=0.0008, momentum=0.7)
 
 step = 1  # 训练step，一个 step 处理一个 batch 的数据
 try:
-    while True:  # 从训练到测试的节奏由 fuckdata.next_batch 控制，因此写个死循环就行
-        batch_x, batch_y, epoch_index = fuckdata.next_batch(batch_size=batch_size, epoch=epoch)
+    while True:  # 从训练到测试的节奏由 next_batch 控制，因此写个死循环就行
+        batch_x, batch_y, epoch_index = loader.next_batch(batch_size=batch_size, epoch=epoch)
         # learning_rate = my_learning_rate(epoch_index, step)
         if epoch_index != 0:
             d_rate = drop_rate  # 判定训练

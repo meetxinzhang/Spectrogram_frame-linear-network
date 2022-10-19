@@ -19,7 +19,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
     """
     该类负责处理客户端s的 Request, 继承自 BaseHTTPRequestHandler
     """
-    def do_GET(self):
+    def get_inf(self):
         """
         处理 get 请求
         Add a new todo
@@ -38,7 +38,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write("Hello from Server!" + json.dumps(data).encode())
 
-    def do_POST(self):
+    def post_inf(self):
         """
         处理 post 请求
         Add a new todo

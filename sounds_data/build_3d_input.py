@@ -1,7 +1,7 @@
 # coding: utf-8
 # ---
 # @File: build_3d_input.py
-# @description: 用于构建3D连续帧序列(详见论文)，在 next_batch.py 中被调用
+# @description: 用于构建3D连续帧序列(详见论文)，在 next_dataset.py 中被调用
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 3月18, 2019
