@@ -1,12 +1,17 @@
 X 计划 
 
-论文已发表 https://doi.org/10.1016/j.ecoinf.2019.101009 ， 使用本项目中的方法请引用；
+This study is in the journal Ecological Informatics. You can find it here https://doi.org/10.1016/j.ecoinf.2019.101009 
 
-本项目受到开源协议保护 Apache License Version 2.0, January 2004 http://www.apache.org/licenses/
+Please cite if you referred our work.
 
-使用本代码必须遵循协议规范，注明出处；
+```
+Zhang X, Chen A, Zhou G, et al. Spectrogram-frame linear network and continuous frame sequence for bird sound classification[J]. Ecological Informatics, 2019, 54: 101009.
+```
 
-[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+Apache License Version 2.0, January 2004 http://www.apache.org/licenses/
+
+
+
 
 基于 TensorFlow 
 
