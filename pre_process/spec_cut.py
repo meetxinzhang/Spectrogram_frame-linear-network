@@ -12,7 +12,7 @@ def windows(length, window_size):
         i += 1
 
 
-def fuck_data(window_size=600):
+def script1(window_size=600):
 
     files_path = 'images'
 
@@ -51,7 +51,7 @@ def fuck_data(window_size=600):
 
 
 if __name__ == '__main__':
-    fuck_data(600)
+    script1(600)
 
 
 

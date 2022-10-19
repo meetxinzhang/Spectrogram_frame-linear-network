@@ -1,8 +1,6 @@
 import os
-import numpy as np
 import librosa.display
 import scipy.misc
-from MyException import MyException
 
 
 def file2img(file_dir):

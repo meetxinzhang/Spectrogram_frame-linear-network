@@ -1,8 +1,8 @@
 # coding: utf-8
 # ---
-# @File: input_data.py
+# @File: next_batch.py
 # @description: 数据发动机，从本地文件夹生成 batch，自驱动，自停止，训练完自动切换测试，
-#   在 eager_main.py 中被调用，只需调用 next_batch 方法
+#   在 main_eager.py 中被调用，只需调用 next_batch 方法
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 3月18, 2019
@@ -11,12 +11,12 @@
 import os
 import numpy as np
 import build_3d_input
-from MyException import MyException
+from utils.MyException import MyException
 from class_names import class_names
 
 
-class input_data(object):
-
+class BatchLoader(object):
+    # TODO parallel
     def __init__(self, file_dir, width=200, move_stride=100, depth=10, num_class=4):
         self.file_dir = file_dir
         self.training = True  # 指示当前状态是训练还是测试
@@ -84,7 +84,7 @@ class input_data(object):
 
         if self.file_point == max:
             if not self.training:
-                # 文件指针到达末尾，并且当前是测试阶段，因此实验完成，抛出异常，让 eager_main.py 接管程序控制
+                # 文件指针到达末尾，并且当前是测试阶段，因此实验完成，抛出异常，让 main_eager.py 接管程序控制
                 raise MyException('数据输送完成')
 
             # 文件指针到达末尾，当前是训练阶段，因此进入下一个 epoch

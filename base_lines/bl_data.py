@@ -10,8 +10,8 @@
 import os
 import numpy as np
 from PIL import Image
-from MyException import MyException
-from class_names import class_names
+from utils.MyException import MyException
+from sounds_data.class_names import class_names
 
 
 class batch_generator(object):

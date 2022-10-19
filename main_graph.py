@@ -1,16 +1,15 @@
 # coding: utf-8
 # ---
-# @File: graph_main.py
+# @File: main_graph.py
 # @description: 主函数，使用 tensorflow graph 模式，废弃不用了
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 3月18, 2019
 # ---
 import tensorflow as tf
-import model
+from SFLN import model
 import time
 import math
-import input_data
 
 sess = tf.InteractiveSession()
 
@@ -44,8 +43,8 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-fuckdata = input_data.input_data(file_dir='sounds_data/new_images',
-                                 move_stride=move_stride, depth=depth, num_class=num_class)
+fuckdata = input_data.BatchLoader(file_dir='sounds_data/new_images',
+                                  move_stride=move_stride, depth=depth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, chennel, depth, height, wigth])
 y_ph = tf.placeholder("float", [None, num_class])
@@ -58,7 +57,7 @@ learning_rate_ph = tf.placeholder(tf.float32)
 # learing_rate = tf.train.exponential_decay(0.1, global_step, 64, 0.7, staircase=False)
 
 ##############################################
-t3lm = model.Model_X(rnn_units=rnn_units, num_class=num_class)
+t3lm = model.SpecLinearNet(rnn_units=rnn_units, num_class=num_class)
 logits = t3lm.call(x_ph, drop_rate=drop_rate_ph)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=y_ph))

@@ -12,15 +12,15 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
-from linear_3d_layer import Linear3DLayer
+from SFLN.linear_3d_layer import Linear3DLayer
 
 
-class Model_X(tf.keras.Model):
+class SpecLinearNet(tf.keras.Model):
     """
     继承自基类 tf.keras.Model
     """
     def __init__(self, rnn_units, num_class):
-        super(Model_X, self).__init__()
+        super(SpecLinearNet, self).__init__()
         self.rnn_units = rnn_units
         self.num_class = num_class
         self.i = 0

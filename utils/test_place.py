@@ -1,7 +1,7 @@
 # coding: utf-8
 # ---
-# @File: something_interesting.py
-# @description: 测试API用
+# @File: test_place.py
+# @description:
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 9月5, 2019
@@ -9,32 +9,32 @@
 
 
 import numpy as np
-import tensorflow as tf
-
-tf.enable_eager_execution()
-
-x = [[[0, 2.1],
-      [0, 2.1]],
-
-     [[1, 1],
-      [1, 1]],
-
-     [[0, 1.1],
-      [0, 1.1]],
-
-     [[1.1, 1.1],
-      [1.1, 1.1]]]
-
-a = [[[2, 2],
-      [2, 2]],
-
-     [[3, 3],
-      [3, 3]]]
-
-# print(tf.multiply(x, a))
-weight = tf.get_variable('weight', shape=[10, 10],
-                         initializer=tf.keras.initializers.he_normal())
-print(weight)
+# import tensorflow as tf
+#
+# tf.enable_eager_execution()
+#
+# x = [[[0, 2.1],
+#       [0, 2.1]],
+#
+#      [[1, 1],
+#       [1, 1]],
+#
+#      [[0, 1.1],
+#       [0, 1.1]],
+#
+#      [[1.1, 1.1],
+#       [1.1, 1.1]]]
+#
+# a = [[[2, 2],
+#       [2, 2]],
+#
+#      [[3, 3],
+#       [3, 3]]]
+#
+# # print(tf.multiply(x, a))
+# weight = tf.get_variable('weight', shape=[10, 10],
+#                          initializer=tf.keras.initializers.he_normal())
+# print(weight)
 
 #
 # labels = [2, 1, 2, 1]

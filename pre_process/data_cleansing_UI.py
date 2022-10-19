@@ -37,7 +37,7 @@ def windows(length, window_size):
         i += 1
 
 
-def fuck_data(window_size=600):
+def screen_visualized(window_size=600):
     file_names = get_list()
     n = len(file_names)
     print('num of file:', n)
@@ -107,7 +107,7 @@ def fuck_data(window_size=600):
 
 
 if __name__ == '__main__':
-    fuck_data(600)
+    screen_visualized(600)
 
 
 

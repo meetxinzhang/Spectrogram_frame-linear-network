@@ -1,6 +1,6 @@
 # coding: utf-8
 # ---
-# @File: input_data.py
+# @File: next_batch.py
 # @description: 时频帧线性层，计算原理是线性卷积，在 model.py 中被调用
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com

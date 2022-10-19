@@ -1,6 +1,6 @@
 # coding: utf-8
 # ---
-# @File: aaa.py
+# @File: socket.py
 # @description: python http demo. 注意，http协议是客户端请求协议，就是说服务器是不能主动发送信息给客户端的；
 #      要实现主动发送，建议采用套接字 Socket 进行通信。
 # @Author: Xin Zhang

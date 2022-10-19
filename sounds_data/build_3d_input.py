@@ -1,14 +1,13 @@
 # coding: utf-8
 # ---
 # @File: build_3d_input.py
-# @description: 用于构建3D连续帧序列(详见论文)，在 input_data.py 中被调用
+# @description: 用于构建3D连续帧序列(详见论文)，在 next_batch.py 中被调用
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
 # @Time: 3月18, 2019
 # ---
 
 # import librosa.display
-from MyException import MyException
 import numpy as np
 from PIL import Image
 

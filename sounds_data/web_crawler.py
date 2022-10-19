@@ -22,7 +22,7 @@ from urllib import request, error
 import sys
 import re
 import os
-import socket
+from sounds_data import socket
 
 
 class MyWebCrawler:

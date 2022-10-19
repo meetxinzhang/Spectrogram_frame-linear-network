@@ -1,6 +1,6 @@
 # coding: utf-8
 # ---
-# @File: eager_main.py
+# @File: main_eager.py
 # @description: 主函数，使用 tensorflow eager 模式
 # @Author: Xin Zhang
 # @E-mail: meetdevin.zh@outlook.com
@@ -8,11 +8,10 @@
 # ---
 
 import tensorflow as tf
-import model
+from SFLN import model
 import math
 import time
-import input_data
-from MyException import MyException
+from utils.MyException import MyException
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.rcParams['font.size'] = 18
@@ -68,8 +67,8 @@ def txt_save(data_m, name):
 
 
 # 初始化 input_data 类的对象
-fuckdata = input_data.input_data(file_dir='E:/数据集/sounds_data/new_images',
-                                 width=width, move_stride=move_stride, depth=depth, num_class=num_class)
+fuckdata = input_data.BatchLoader(file_dir='E:/数据集/sounds_data/new_images',
+                                  width=width, move_stride=move_stride, depth=depth, num_class=num_class)
 
 
 def my_learning_rate(epoch_index, step):
@@ -93,7 +92,7 @@ def cal_loss(logits, lab_batch):
 
 
 # 初始化模型和优化器
-the_model = model.Model_X(rnn_units=rnn_units, num_class=num_class)
+the_model = model.SpecLinearNet(rnn_units=rnn_units, num_class=num_class)
 optimizer = tf.optimizers.RMSprop(learning_rate=0.0008, momentum=0.7)
 # 获取模型中可训练的参数
 # trainable_vas = the_model.trainable_variables
