@@ -1,4 +1,4 @@
-Spectrogram-frame linear network and continuous frame sequence for bird sound classification
+### Spectrogram-frame linear network and continuous frame sequence for bird sound classification
 
 
 Here are the official implementation. This study is in the journal Ecological Informatics. You can find it here https://doi.org/10.1016/j.ecoinf.2019.101009 
