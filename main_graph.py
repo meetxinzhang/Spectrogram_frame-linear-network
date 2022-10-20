@@ -8,7 +8,6 @@
 # ---
 import tensorflow as tf
 from SFLN import model
-from sounds_data.next_dataset import BatchLoader
 import time
 import math
 
@@ -44,8 +43,8 @@ activate tf
 tensorboard --logdir=tensor_logs
 """
 logs_path = 'tensor_logs/' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-loader = BatchLoader(file_dir='sounds_data/new_images',
-                     move_stride=move_stride, depth=depth, num_class=num_class)
+fuckdata = input_data.BatchLoader(file_dir='sounds_data/new_images',
+                                  move_stride=move_stride, depth=depth, num_class=num_class)
 
 x_ph = tf.placeholder("float", [None, chennel, depth, height, wigth])
 y_ph = tf.placeholder("float", [None, num_class])
@@ -87,7 +86,7 @@ summary_test_writer = tf.summary.FileWriter(logs_path + '/test')
 step = 1
 first = True
 while True:
-    batch_x, batch_y, epoch_index = loader.next_batch(batch_size=batch_size, epoch=epoch)
+    batch_x, batch_y, epoch_index = fuckdata.next_batch(batch_size=batch_size, epoch=epoch)
     lr = my_learning_rate(epoch_index, step)
 
     if epoch_index != 0:
@@ -97,8 +96,7 @@ while True:
         summary_train_writer.add_summary(summary, step)  # 在每次迭代中将数据写入事件文件
     else:
         if first:
-            step = 0
-            first = False  # 测试时将step归零
+            step = 0; first = False  # 测试时将step归零
         d_rate = 0
         _, summary = sess.run([optimizer, merged_summary_op],
                               feed_dict={x_ph: batch_x, y_ph: batch_y, drop_rate_ph: d_rate, learning_rate_ph: lr})
