@@ -44,7 +44,7 @@ y_pred = []
 
 def txt_save(data_m, name):
     """
-    以 txt 保存实验日志，tensorboard 画的图实在太丑了，并且不支持 eager 模式，只好自己写一个；
+    以 txt 保存实验日志；
     该 txt 文件，在draw_cm.py, draw_many_line.py, draw_single_line.py 中均支持，txt 文件说明如下：
     ————————————————————
     训练损失------line
