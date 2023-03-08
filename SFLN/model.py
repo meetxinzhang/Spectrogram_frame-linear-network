@@ -12,7 +12,7 @@ import tensorflow as tf
 from PIL import Image
 import scipy.misc
 import os
-from SFLN.linear_3d_layer import Linear3DLayer
+from SFLN.linear_conv3d_layer import LinearConv3D
 
 
 class SpecLinearNet(tf.keras.Model):
@@ -26,12 +26,12 @@ class SpecLinearNet(tf.keras.Model):
         self.i = 0
 
         # 线性层
-        self.lcl1 = Linear3DLayer(filters=8, kernel_size=[1, 3, 75, 6],
-                                  activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl2 = Linear3DLayer(filters=8, kernel_size=[8, 3, 36, 3],
-                                  activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
-        self.lcl3 = Linear3DLayer(filters=8, kernel_size=[8, 3, 17, 2],
-                                  activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
+        self.lcl1 = LinearConv3D(filters=8, kernel_size=[1, 3, 75, 6],
+                                 activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl2 = LinearConv3D(filters=8, kernel_size=[8, 3, 36, 3],
+                                 activate_size=[3, 1, 2], activate_stride=[3, 1, 1])
+        self.lcl3 = LinearConv3D(filters=8, kernel_size=[8, 3, 17, 2],
+                                 activate_size=[3, 1, 1], activate_stride=[3, 1, 1])
 
         # 池化层
         self.pooling1 = tf.keras.layers.MaxPool3D(pool_size=[2, 2, 2], strides=[2, 2, 2], padding='same',

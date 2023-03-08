@@ -1,7 +1,7 @@
 ### Spectrogram-frame linear network and continuous frame sequence for bird sound classification
 
 
-Here are the official implementation. This study is in the journal Ecological Informatics. You can find it here https://doi.org/10.1016/j.ecoinf.2019.101009 
+Here are the official TensorFlow implementation. This study is in the journal Ecological Informatics. You can find it here https://doi.org/10.1016/j.ecoinf.2019.101009 
 
 Please cite if you referred our work.
 
@@ -11,10 +11,6 @@ Zhang X, Chen A, Zhou G, et al. Spectrogram-frame linear network and continuous 
 
 Apache License Version 2.0, January 2004 http://www.apache.org/licenses/
 
-
-
-
-基于 TensorFlow 
 
 项目内容包括：
 

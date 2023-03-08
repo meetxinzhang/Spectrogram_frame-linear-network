@@ -12,7 +12,7 @@ import tensorflow as tf
 import numpy as np
 
 
-class Linear3DLayer(tf.keras.layers.Layer):
+class LinearConv3D(tf.keras.layers.Layer):
     def __init__(self, filters, kernel_size, activate_size, activate_stride):
         """
         继承自基类 tf.keras.layers.Layer
@@ -25,7 +25,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
         :param activate_size: 在过滤器上的激活窗口大小，维度说明： [连续帧深度，单帧高，单帧宽]
         :param activate_stride: 在过滤器上的激活窗口移动步长，维度说明： [连续帧深度，单帧高，单帧宽]
         """
-        super(Linear3DLayer, self).__init__()
+        super(LinearConv3D, self).__init__()
         self.filters = filters
         self.margin = 0  # self.margin = height-self.h
         [self.c, self.d, self.h, self.w] = kernel_size
@@ -118,7 +118,7 @@ class Linear3DLayer(tf.keras.layers.Layer):
 
             features_map = tf.concat([features_map, slice_map], axis=2)  # 组合为多帧（完整的）特征图
 
-            # 释放内存，好像没什么屁用
+            # 释放内存
             d_slice = None
             slice_map = None
             a = None
