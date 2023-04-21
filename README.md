@@ -3,6 +3,17 @@
 
 Here are the official TensorFlow implementation. This study is in the journal Ecological Informatics. You can find it here https://doi.org/10.1016/j.ecoinf.2019.101009 
 
+Highlights
+1) Continuous frame sequence as a dynamic visual representation of the bird sound;
+2) Spectrogram-frame linear network (SFLN) is used for the classification of bird sound, which 
+emphasizes the changes of bird sound in time domain and frequency domain;
+3) The shorter the frame length and frame shift of consecutive frame sequences, and the 
+better the classification effect of SFLN;
+4) The method achieves excellent classification effects and has good robustness in complex 
+backgrounds.
+
+![微信截图_20230421110614](https://user-images.githubusercontent.com/12469551/233531064-ded0dffb-a781-49d1-80fb-d6405ebb1c85.png)
+
 Please cite if you referred our work.
 
 ```
